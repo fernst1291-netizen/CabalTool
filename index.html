@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabal Field Boss & Timer Tracker</title>
-    <!-- Supabase Client per CDN einbinden -->
+    <title>Cabal Field Boss Tracker 1.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -20,7 +19,6 @@
             --accent-kill: #eab308;
             --accent-force: #3b82f6;
             --accent-danger: #ef4444;
-            --accent-test: #f97316;
             
             --transition-speed: 0.3s;
         }
@@ -202,21 +200,6 @@
             text-align: left;
         }
 
-        .dev-clear-btn {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-        }
-
-        .dev-clear-btn:hover {
-            background-color: var(--accent-danger);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -239,7 +222,6 @@
             background-color: rgba(255, 255, 255, 0.02);
         }
 
-        /* Markierung für verpasste/force-resetzte Spawns */
         tr.missed-row td {
             background-color: rgba(239, 68, 68, 0.05);
         }
@@ -309,6 +291,23 @@
             opacity: 0.5;
         }
 
+        .dev-btn {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #e9d5ff;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .dev-btn:hover {
+            background-color: var(--accent-boss);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
         .delete-btn {
             background-color: rgba(239, 68, 68, 0.2);
             color: #fca5a5;
@@ -326,22 +325,6 @@
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
         }
 
-        .test-btn {
-            background-color: rgba(249, 115, 22, 0.2);
-            color: #fed7aa;
-            border: 1px solid rgba(249, 115, 22, 0.4);
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-bottom: 4px;
-        }
-
-        .test-btn:hover {
-            background-color: var(--accent-test);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
-        }
-
         .empty-table {
             text-align: center;
             color: var(--text-secondary);
@@ -355,24 +338,19 @@
     <div class="container">
         <h2>Cabal Field Boss & Timer Tracker</h2>
 
-        <!-- 1. Reihe: Map-Buttons -->
         <div id="mapContainer" class="button-row"></div>
 
-        <!-- 2. Reihe: Boss-Wrapper -->
         <div id="bossWrapper" class="wrapper">
             <div id="bossContainer" class="button-row"></div>
 
-            <!-- 3. Reihe: Channel-Wrapper -->
             <div id="channelWrapper" class="wrapper">
                 <div id="channelContainer" class="button-row"></div>
             </div>
         </div>
 
-        <!-- Tabelle -->
         <div class="table-section">
             <div class="table-header-row">
                 <h3>Active Spawns Tracker</h3>
-                <button id="clearTableBtn" class="dev-clear-btn">🧹 Tabelle leeren (Dev)</button>
             </div>
             <table>
                 <thead>
@@ -410,11 +388,11 @@
             { name: "Berderk Faello" }
         ],
         "Pontus Ferrum": [
-            { name: "TA-01 Gravis Rota (Cap)" },
-            { name: "TA-01 Gravis Rota (Proc)" },
+            { name: "TA-01 Gravis Rota (oben)" },
+            { name: "TA-01 Gravis Rota (unten)" },
             { name: "MA-06 Quadra" },
-            { name: "FP-01 Magnus Penna (Cap)" },
-            { name: "FP-01 Magnus Penna (Proc)" },
+            { name: "FP-01 Magnus Penna (oben)" },
+            { name: "FP-01 Magnus Penna (unten)" },
             { name: "UMD-03 Lautus Pluma" }
         ],
         "Porta Inferno": [
@@ -436,7 +414,6 @@
     const channelWrapper = document.getElementById('channelWrapper');
     const channelContainer = document.getElementById('channelContainer');
     const trackerTableBody = document.getElementById('trackerTableBody');
-    const clearTableBtn = document.getElementById('clearTableBtn');
 
     let activeMapButton = null;
     let activeBossButton = null;
@@ -447,9 +424,6 @@
 
     let activeEntries = [];
     const channelButtonMap = {};
-    
-    // Frontend-Speicher für markierte/verpasste Timer (IDs)
-    const missedIds = new Set();
 
     // --- DATENBANK: Daten beim Start laden ---
     async function fetchSpawns() {
@@ -460,7 +434,8 @@
                 map: item.map,
                 boss: item.boss,
                 channel: item.channel,
-                endTime: new Date(item.end_time).getTime()
+                endTime: new Date(item.end_time).getTime(),
+                isMissed: item.is_missed
             }));
             rebuildTable();
         } else {
@@ -476,17 +451,7 @@
       })
       .subscribe();
 
-    // Dev-Button: Löscht alle Einträge direkt aus der Datenbank & bereinigt Markierungen
-    clearTableBtn.addEventListener('click', async () => {
-        const { error } = await _supabase.from('boss_spawns-dev').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        if (!error) {
-            missedIds.clear();
-        } else {
-            console.error('Fehler beim Leeren:', error);
-        }
-    });
-
-    // Channel-Buttons (1 bis 15) generieren (Obere Channel-Logik)
+    // Channel-Buttons (1 bis 15) generieren
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
         chBtn.className = 'channel-btn';
@@ -505,19 +470,14 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
 
-            // Markierung für dieses spezifische Objekt über obere Channel-Logik zurücksetzen
-            const existingMatch = activeEntries.find(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss && e.channel === channelName);
-            if (existingMatch) {
-                missedIds.delete(existingMatch.id);
-            }
-
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
             
             const { error } = await _supabase.from('boss_spawns-dev').upsert({
                 map: currentSelectedMap,
                 boss: currentSelectedBoss,
                 channel: channelName,
-                end_time: fourHoursLater
+                end_time: fourHoursLater,
+                is_missed: false
             }, { onConflict: 'map,boss,channel' });
 
             if (error) console.error('Fehler beim Speichern:', error);
@@ -601,46 +561,29 @@
 
     // --- Globale Aktions-Funktionen ---
     window.killTimer = async function(id) {
-        // Markierung beim normalen Kill (Reset) aufheben
-        missedIds.delete(id);
-
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         const { error } = await _supabase.from('boss_spawns-dev')
-            .update({ end_time: fourHoursLater })
+            .update({ end_time: fourHoursLater, is_missed: false })
             .eq('id', id);
         if (error) console.error('Fehler beim Kill-Update:', error);
     };
 
-    window.forceResetTimer = async function(id, currentEndTime) {
-        const now = Date.now();
-        const diff = currentEndTime - now; 
-
-        if (diff >= 0) return;
-
-        // Als verpasst/force-resetz markieren (bleibt erhalten bei erneutem Aufruf)
-        missedIds.add(id);
-
-        const fourHoursFromNow = now + (4 * 60 * 60 * 1000);
-        const newEndTime = fourHoursFromNow + diff; 
-
-        const { error } = await _supabase.from('boss_spawns-dev')
-            .update({ end_time: new Date(newEndTime).toISOString() })
-            .eq('id', id);
+    window.forceResetTimer = async function(id) {
+        const { error } = await _supabase.rpc('manual_force_reset', { p_id: id });
         if (error) console.error('Fehler beim Force-Reset:', error);
     };
 
-    window.deleteSpawn = async function(id) {
-        missedIds.delete(id);
-        const { error } = await _supabase.from('boss_spawns-dev').delete().eq('id', id);
-        if (error) console.error('Fehler beim Löschen:', error);
-    };
-
-    window.testSetMinus9 = async function(id) {
+    window.devSetNegativeTime = async function(id) {
         const nineMinutesAgo = new Date(Date.now() - (9 * 60 * 1000)).toISOString();
         const { error } = await _supabase.from('boss_spawns-dev')
             .update({ end_time: nineMinutesAgo })
             .eq('id', id);
-        if (error) console.error('Fehler beim Test-Setzen:', error);
+        if (error) console.error('Fehler beim Dev-Update:', error);
+    };
+
+    window.deleteSpawn = async function(id) {
+        const { error } = await _supabase.from('boss_spawns-dev').delete().eq('id', id);
+        if (error) console.error('Fehler beim Löschen:', error);
     };
 
     function updateChannelHighlights() {
@@ -690,21 +633,20 @@
         activeEntries.sort((a, b) => a.endTime - b.endTime);
 
         activeEntries.forEach(entry => {
-            const isMissed = missedIds.has(entry.id);
             const tr = document.createElement('tr');
             tr.id = `row-${entry.id}`;
-            if (isMissed) tr.classList.add('missed-row');
+            if (entry.isMissed) tr.classList.add('missed-row');
 
             tr.innerHTML = `
                 <td>${entry.map}</td>
-                <td><span class="boss-name-span">${entry.boss}</span>${isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td class="timer-cell">--:--:--</td>
                 <td>
                     <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
-                    <button class="force-btn" onclick="forceResetTimer('${entry.id}', ${entry.endTime})">Force</button>
+                    <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
+                    <button class="dev-btn" onclick="devSetNegativeTime('${entry.id}')">Dev (-9m)</button>
                     <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
-                    <button class="test-btn" onclick="testSetMinus9('${entry.id}')">🧪 Test (-9m)</button>
                 </td>
             `;
             trackerTableBody.appendChild(tr);
@@ -713,8 +655,8 @@
         updateTableValues();
     }
 
-    // Sekündliche Aktualisierung der Werte und des DOMs ohne Zeilen neu zu zerstören
-    function updateTableValues() {
+    // Sekündliche Aktualisierung der verbleibenden Zeit im DOM & Prüfung auf -10 Min
+    async function updateTableValues() {
         if (activeEntries.length === 0) return;
 
         const currentRows = trackerTableBody.querySelectorAll('tr[id^="row-"]');
@@ -723,7 +665,7 @@
             return;
         }
 
-        activeEntries.forEach(entry => {
+        for (const entry of activeEntries) {
             const tr = document.getElementById(`row-${entry.id}`);
             if (!tr) {
                 rebuildTable();
@@ -733,33 +675,31 @@
             const timeLeftMs = entry.endTime - Date.now();
             const isNegative = timeLeftMs < 0;
 
-            // Automatischer Reset, wenn der Timer -10 Minuten (-600000ms) überschreitet
-            if (timeLeftMs < -600000) {
-                window.forceResetTimer(entry.id, entry.endTime);
-                return;
+            // Automatische Prüfung auf -10 Minuten (-600.000 ms)
+            if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed) {
+                // Setze is_missed auf true in der Datenbank
+                await _supabase.from('boss_spawns-dev')
+                    .update({ is_missed: true })
+                    .eq('id', entry.id);
             }
 
-            // Markierungs-Zustand für diese Zeile ermitteln und updaten
-            const isMissed = missedIds.has(entry.id);
-            tr.classList.toggle('missed-row', isMissed);
+            tr.classList.toggle('missed-row', entry.isMissed);
             
             const bossTd = tr.cells[1];
             let badgeEl = bossTd.querySelector('.missed-badge');
-            if (isMissed && !badgeEl) {
+            if (entry.isMissed && !badgeEl) {
                 bossTd.insertAdjacentHTML('beforeend', '<span class="missed-badge">⚠️ Verpasst</span>');
-            } else if (!isMissed && badgeEl) {
+            } else if (!entry.isMissed && badgeEl) {
                 badgeEl.remove();
             }
 
-            // Timer-Zelle aktualisieren
             const cell = tr.querySelector('.timer-cell');
             cell.innerText = formatTimeLeft(timeLeftMs);
             cell.className = `timer-cell ${isNegative ? 'negative' : ''}`;
 
-            // Force-Button Status aktualisieren
             const forceBtn = tr.querySelector('.force-btn');
             forceBtn.disabled = !isNegative;
-        });
+        }
 
         updateChannelHighlights();
     }
@@ -767,7 +707,7 @@
     // Beim Laden Daten abrufen
     fetchSpawns();
 
-    // Sekündlicher Takt
+    // Sekündlicher Takt für flüssige Zeitanzeige
     setInterval(() => {
         updateTableValues();
     }, 1000);
