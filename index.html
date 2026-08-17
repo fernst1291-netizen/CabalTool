@@ -223,6 +223,23 @@
             background-color: rgba(255, 255, 255, 0.02);
         }
 
+        /* Markierung für verpasste/force-resetzte Spawns */
+        tr.missed-row td {
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .missed-badge {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
         .timer-cell {
             font-family: monospace;
             font-size: 15px;
@@ -274,6 +291,23 @@
             border-color: var(--border-color);
             cursor: not-allowed;
             opacity: 0.5;
+        }
+
+        .delete-btn {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: var(--accent-danger);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
         }
 
         .empty-table {
@@ -379,6 +413,9 @@
 
     let activeEntries = [];
     const channelButtonMap = {};
+    
+    // Frontend-Speicher für markierte/verpasste Timer (IDs)
+    const missedIds = new Set();
 
     // --- DATENBANK: Daten beim Start laden ---
     async function fetchSpawns() {
@@ -391,8 +428,7 @@
                 channel: item.channel,
                 endTime: new Date(item.end_time).getTime()
             }));
-            updateChannelHighlights();
-            renderTable();
+            rebuildTable();
         } else {
             console.error('Fehler beim Laden der Spawns:', error);
         }
@@ -406,7 +442,7 @@
       })
       .subscribe();
 
-    // Channel-Buttons (1 bis 15) generieren
+    // Channel-Buttons (1 bis 15) generieren (Obere Channel-Logik)
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
         chBtn.className = 'channel-btn';
@@ -424,6 +460,12 @@
             }
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
+
+            // Markierung für dieses spezifische Objekt über obere Channel-Logik zurücksetzen
+            const existingMatch = activeEntries.find(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss && e.channel === channelName);
+            if (existingMatch) {
+                missedIds.delete(existingMatch.id);
+            }
 
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
             
@@ -513,8 +555,11 @@
         mapContainer.appendChild(mapBtn);
     });
 
-    // Kill: Setzt den Timer auf volle 4 Stunden ab jetzt
+    // --- Globale Aktions-Funktionen ---
     window.killTimer = async function(id) {
+        // Markierung beim normalen Kill (Reset) aufheben
+        missedIds.delete(id);
+
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         const { error } = await _supabase.from('boss_spawns')
             .update({ end_time: fourHoursLater })
@@ -522,12 +567,14 @@
         if (error) console.error('Fehler beim Kill-Update:', error);
     };
 
-    // Force-Reset: Funktioniert nur im negativen Bereich (ms < 0)
     window.forceResetTimer = async function(id, currentEndTime) {
         const now = Date.now();
         const diff = currentEndTime - now; 
 
         if (diff >= 0) return;
+
+        // Als verpasst/force-resetz markieren (bleibt erhalten bei erneutem Aufruf)
+        missedIds.add(id);
 
         const fourHoursFromNow = now + (4 * 60 * 60 * 1000);
         const newEndTime = fourHoursFromNow + diff; 
@@ -536,6 +583,12 @@
             .update({ end_time: new Date(newEndTime).toISOString() })
             .eq('id', id);
         if (error) console.error('Fehler beim Force-Reset:', error);
+    };
+
+    window.deleteSpawn = async function(id) {
+        missedIds.delete(id);
+        const { error } = await _supabase.from('boss_spawns').delete().eq('id', id);
+        if (error) console.error('Fehler beim Löschen:', error);
     };
 
     function updateChannelHighlights() {
@@ -572,7 +625,8 @@
         return isNegative ? `-${timeStr}` : timeStr;
     }
 
-    function renderTable() {
+    // --- Tabelle initial aufbauen ---
+    function rebuildTable() {
         trackerTableBody.innerHTML = '';
 
         if (activeEntries.length === 0) {
@@ -584,38 +638,87 @@
         activeEntries.sort((a, b) => a.endTime - b.endTime);
 
         activeEntries.forEach(entry => {
-            const timeLeftMs = entry.endTime - Date.now();
-            const isNegative = timeLeftMs < 0;
-
-            if (timeLeftMs < -600000) {
-                window.forceResetTimer(entry.id, entry.endTime);
-                return;
-            }
-
+            const isMissed = missedIds.has(entry.id);
             const tr = document.createElement('tr');
+            tr.id = `row-${entry.id}`;
+            if (isMissed) tr.classList.add('missed-row');
+
             tr.innerHTML = `
                 <td>${entry.map}</td>
-                <td>${entry.boss}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
-                <td class="timer-cell ${isNegative ? 'negative' : ''}">${formatTimeLeft(timeLeftMs)}</td>
+                <td class="timer-cell">--:--:--</td>
                 <td>
                     <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
-                    <button class="force-btn" ${!isNegative ? 'disabled' : ''} onclick="forceResetTimer('${entry.id}', ${entry.endTime})">Force</button>
+                    <button class="force-btn" onclick="forceResetTimer('${entry.id}', ${entry.endTime})">Force</button>
+                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
                 </td>
             `;
             trackerTableBody.appendChild(tr);
         });
 
+        updateTableValues();
+    }
+
+    // Sekündliche Aktualisierung der Werte und des DOMs ohne Zeilen neu zu zerstören
+    function updateTableValues() {
+        if (activeEntries.length === 0) return;
+
+        const currentRows = trackerTableBody.querySelectorAll('tr[id^="row-"]');
+        if (currentRows.length !== activeEntries.length) {
+            rebuildTable();
+            return;
+        }
+
+        activeEntries.forEach(entry => {
+            const tr = document.getElementById(`row-${entry.id}`);
+            if (!tr) {
+                rebuildTable();
+                return;
+            }
+
+            const timeLeftMs = entry.endTime - Date.now();
+            const isNegative = timeLeftMs < 0;
+
+            // Automatischer Reset, wenn der Timer -10 Minuten (-600000ms) überschreitet
+            if (timeLeftMs < -600000) {
+                window.forceResetTimer(entry.id, entry.endTime);
+                return;
+            }
+
+            // Markierungs-Zustand für diese Zeile ermitteln und updaten
+            const isMissed = missedIds.has(entry.id);
+            tr.classList.toggle('missed-row', isMissed);
+            
+            const bossTd = tr.cells[1];
+            let badgeEl = bossTd.querySelector('.missed-badge');
+            if (isMissed && !badgeEl) {
+                bossTd.insertAdjacentHTML('beforeend', '<span class="missed-badge">⚠️ Verpasst</span>');
+            } else if (!isMissed && badgeEl) {
+                badgeEl.remove();
+            }
+
+            // Timer-Zelle aktualisieren
+            const cell = tr.querySelector('.timer-cell');
+            cell.innerText = formatTimeLeft(timeLeftMs);
+            cell.className = `timer-cell ${isNegative ? 'negative' : ''}`;
+
+            // Force-Button Status aktualisieren
+            const forceBtn = tr.querySelector('.force-btn');
+            forceBtn.disabled = !isNegative;
+        });
+
         updateChannelHighlights();
     }
 
+    // Beim Laden Daten abrufen
     fetchSpawns();
 
+    // Sekündlicher Takt
     setInterval(() => {
-        if (activeEntries.length === 0) return;
-        renderTable();
+        updateTableValues();
     }, 1000);
-</script>
+    </script>
 
 </body>
 </html>
