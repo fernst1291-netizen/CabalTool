@@ -336,7 +336,7 @@
 <body>
 
     <div class="container">
-        <h2>Cabal Field Boss & Timer Tracker</h2>
+        <h2>Cabal Field Boss Tracker 1.0</h2>
 
         <div id="mapContainer" class="button-row"></div>
 
@@ -676,12 +676,15 @@
             const isNegative = timeLeftMs < 0;
 
             // Automatische Prüfung auf -10 Minuten (-600.000 ms)
-            if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed) {
-                // Setze is_missed auf true in der Datenbank
-                await _supabase.from('boss_spawns-dev')
-                    .update({ is_missed: true })
-                    .eq('id', entry.id);
-            }
+           // In updateTableValues() anpassen:
+	if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed && !entry._updatingMissed) {
+    entry._updatingMissed = true;
+    entry.isMissed = true; // Lokal sofort sperren, um Mehrfach-Trigger zu verhindern
+    
+    await _supabase.from('boss_spawns-dev')
+        .update({ is_missed: true })
+        .eq('id', entry.id);
+}
 
             tr.classList.toggle('missed-row', entry.isMissed);
             
