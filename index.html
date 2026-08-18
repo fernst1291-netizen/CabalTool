@@ -196,7 +196,24 @@
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         await _supabase.from('boss_spawns').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
     };
-    window.forceResetTimer = async function(id) { await _supabase.rpc('manual_force_reset', { p_id: id }); };
+
+    window.forceResetTimer = async function(id) {
+        const entry = activeEntries.find(e => e.id === id);
+        if (!entry) return;
+        
+        let newEndTime = entry.endTime;
+        const now = Date.now();
+        
+        while (newEndTime <= now) {
+            newEndTime += 4 * 60 * 60 * 1000;
+        }
+
+        await _supabase.from('boss_spawns').update({ 
+            end_time: new Date(newEndTime).toISOString(), 
+            is_missed: true 
+        }).eq('id', id);
+    };
+
     window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns').delete().eq('id', id); };
 
     function updateChannelHighlights() {
