@@ -133,7 +133,7 @@
     const pendingUpdates = new Set();
 
     async function fetchSpawns() {
-        const { data, error } = await _supabase.from('boss_spawns').select('*');
+        const { data, error } = await _supabase.from('boss_spawns_2_2_2').select('*');
         if (!error && data) {
             activeEntries = data.map(item => ({
                 id: item.id, map: item.map, boss: item.boss, channel: item.channel,
@@ -143,7 +143,7 @@
         }
     }
 
-    _supabase.channel('public:boss_spawns').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns' }, () => { fetchSpawns(); }).subscribe();
+    _supabase.channel('public:boss_spawns_2_2_2').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns_2_2_2' }, () => { fetchSpawns(); }).subscribe();
 
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
@@ -158,7 +158,7 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            await _supabase.from('boss_spawns').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
+            await _supabase.from('boss_spawns_2_2_2').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
     }
@@ -195,7 +195,7 @@
 
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        await _supabase.from('boss_spawns').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
+        await _supabase.from('boss_spawns_2_2_2').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
     };
 
     window.forceResetTimer = async function(id) {
@@ -209,13 +209,13 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
-        await _supabase.from('boss_spawns').update({ 
+        await _supabase.from('boss_spawns_2_2_2').update({ 
             end_time: new Date(newEndTime).toISOString(), 
             is_missed: true 
         }).eq('id', id);
     };
 
-    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns').delete().eq('id', id); };
+    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns_2_2_2').delete().eq('id', id); };
 
     function updateChannelHighlights() {
         Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
@@ -276,7 +276,7 @@
                     newEndTime += 4 * 60 * 60 * 1000;
                 }
 
-                _supabase.from('boss_spawns')
+                _supabase.from('boss_spawns_2_2_2')
                     .update({ 
                         end_time: new Date(newEndTime).toISOString(), 
                         is_missed: true 
