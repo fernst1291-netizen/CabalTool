@@ -222,7 +222,7 @@
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Boss -> Channel aus.</td></tr>`;
+            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">No active records. Select a boss -> Channel.</td></tr>`;
             updateChannelHighlights(); return;
         }
         activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
