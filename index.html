@@ -33,379 +33,91 @@
             min-height: 100vh;
         }
 
-        h2, h3 {
-            text-align: center;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
+        h2, h3 { text-align: center; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-        .button-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
+        .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        button {
-            border: 1px solid var(--border-color);
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            outline: none;
-        }
+        button { border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); outline: none; }
 
-        /* 1. Reihe: Map-Buttons */
-        .map-btn {
-            background-color: rgba(30, 41, 59, 0.6);
-            color: var(--text-primary);
-        }
+        .map-btn { background-color: rgba(30, 41, 59, 0.6); color: var(--text-primary); }
+        .map-btn:hover { background-color: rgba(56, 189, 248, 0.15); border-color: var(--accent-map); color: var(--accent-map); transform: translateY(-2px); }
+        .map-btn.active { background-color: var(--accent-map); color: #0f172a; border-color: var(--accent-map); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
 
-        .map-btn:hover {
-            background-color: rgba(56, 189, 248, 0.15);
-            border-color: var(--accent-map);
-            color: var(--accent-map);
-            transform: translateY(-2px);
-        }
+        .wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; padding-top: 0; padding-bottom: 0; border-width: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .wrapper.visible { max-height: 500px; opacity: 1; padding: 20px; border-width: 1px; margin-top: 10px; }
 
-        .map-btn.active {
-            background-color: var(--accent-map);
-            color: #0f172a;
-            border-color: var(--accent-map);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
+        .boss-btn { background-color: rgba(45, 27, 105, 0.4); color: #e9d5ff; border-color: rgba(168, 85, 247, 0.2); }
+        .boss-btn:hover { background-color: rgba(168, 85, 247, 0.2); border-color: var(--accent-boss); color: #ffffff; transform: translateY(-2px); }
+        .boss-btn.active { background-color: var(--accent-boss); color: #ffffff; border-color: var(--accent-boss); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
 
-        /* Wrapper für Unterebenen */
-        .wrapper {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            margin-top: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            border-width: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .channel-btn { background-color: rgba(6, 78, 59, 0.4); color: #d1fae5; border-color: rgba(16, 185, 129, 0.2); padding: 8px 14px; font-size: 13px; position: relative; }
+        .channel-btn:hover { background-color: var(--accent-channel); color: #022c22; border-color: var(--accent-channel); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+        .channel-btn.active { background-color: var(--accent-channel); color: #022c22; border-color: var(--accent-channel); box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+        .channel-btn.has-spawn { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        .channel-btn.has-spawn::after { content: ''; position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background-color: #38bdf8; border-radius: 50%; box-shadow: 0 0 6px #38bdf8; }
 
-        .wrapper.visible {
-            max-height: 500px;
-            opacity: 1;
-            padding: 20px;
-            border-width: 1px;
-            margin-top: 10px;
-        }
-
-        /* 2. Reihe: Boss-Buttons */
-        .boss-btn {
-            background-color: rgba(45, 27, 105, 0.4);
-            color: #e9d5ff;
-            border-color: rgba(168, 85, 247, 0.2);
-        }
-
-        .boss-btn:hover {
-            background-color: rgba(168, 85, 247, 0.2);
-            border-color: var(--accent-boss);
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        .boss-btn.active {
-            background-color: var(--accent-boss);
-            color: #ffffff;
-            border-color: var(--accent-boss);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
-        }
-
-        /* 3. Reihe: Channel-Buttons */
-        .channel-btn {
-            background-color: rgba(6, 78, 59, 0.4);
-            color: #d1fae5;
-            border-color: rgba(16, 185, 129, 0.2);
-            padding: 8px 14px;
-            font-size: 13px;
-            position: relative;
-        }
-
-        .channel-btn:hover {
-            background-color: var(--accent-channel);
-            color: #022c22;
-            border-color: var(--accent-channel);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .channel-btn.active {
-            background-color: var(--accent-channel);
-            color: #022c22;
-            border-color: var(--accent-channel);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
-        }
-
-        .channel-btn.has-spawn {
-            border-color: #38bdf8;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        }
-
-        .channel-btn.has-spawn::after {
-            content: '';
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            width: 8px;
-            height: 8px;
-            background-color: #38bdf8;
-            border-radius: 50%;
-            box-shadow: 0 0 6px #38bdf8;
-        }
-
-        /* Tabelle Styles */
-        .table-section {
-            margin-top: 30px;
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .table-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .table-header-row h3 {
-            margin: 0;
-            text-align: left;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-        }
-
-        th {
-            color: var(--text-secondary);
-            font-weight: 600;
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        tr:hover td {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        tr.missed-row td {
-            background-color: rgba(239, 68, 68, 0.05);
-        }
-
-        .missed-badge {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 2px 6px;
-            font-size: 11px;
-            border-radius: 4px;
-            margin-left: 8px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .timer-cell {
-            font-family: monospace;
-            font-size: 15px;
-            font-weight: 600;
-            color: #38bdf8;
-        }
-
-        .timer-cell.negative {
-            color: var(--accent-danger);
-        }
-
-        .kill-btn {
-            background-color: rgba(234, 179, 8, 0.2);
-            color: #fef08a;
-            border: 1px solid rgba(234, 179, 8, 0.4);
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
-
-        .kill-btn:hover {
-            background-color: var(--accent-kill);
-            color: #713f12;
-            box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
-        }
-
-        .force-btn {
-            background-color: rgba(59, 130, 246, 0.2);
-            color: #bfdbfe;
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
-
-        .force-btn:hover:not(:disabled) {
-            background-color: var(--accent-force);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-        }
-
-        .force-btn:disabled {
-            background-color: rgba(255, 255, 255, 0.03);
-            color: var(--text-secondary);
-            border-color: var(--border-color);
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .dev-btn {
-            background-color: rgba(168, 85, 247, 0.2);
-            color: #e9d5ff;
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
-
-        .dev-btn:hover {
-            background-color: var(--accent-boss);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
-        }
-
-        .delete-btn {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 6px;
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
-
-        .delete-btn:hover {
-            background-color: var(--accent-danger);
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-        }
-
-        .empty-table {
-            text-align: center;
-            color: var(--text-secondary);
-            padding: 20px;
-            font-style: italic;
-        }
+        .table-section { margin-top: 30px; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .table-header-row h3 { margin: 0; text-align: left; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { color: var(--text-secondary); font-weight: 600; background-color: rgba(255, 255, 255, 0.02); }
+        tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
+        tr.missed-row td { background-color: rgba(239, 68, 68, 0.05); }
+        .missed-badge { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; border-radius: 4px; margin-left: 8px; font-weight: 600; display: inline-block; }
+        .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
+        .timer-cell.negative { color: var(--accent-danger); }
+        .kill-btn, .force-btn, .dev-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; }
+        .kill-btn { background-color: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.4); }
+        .kill-btn:hover { background-color: var(--accent-kill); color: #713f12; }
+        .force-btn { background-color: rgba(59, 130, 246, 0.2); color: #bfdbfe; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .force-btn:hover:not(:disabled) { background-color: var(--accent-force); color: #ffffff; }
+        .force-btn:disabled { background-color: rgba(255, 255, 255, 0.03); color: var(--text-secondary); cursor: not-allowed; opacity: 0.5; }
+        .dev-btn { background-color: rgba(168, 85, 247, 0.2); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.4); }
+        .dev-btn:hover { background-color: var(--accent-boss); color: #ffffff; }
+        .delete-btn { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .delete-btn:hover { background-color: var(--accent-danger); color: #ffffff; }
+        .empty-table { text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>Cabal Field Boss Tracker 1.0</h2>
-
         <div id="mapContainer" class="button-row"></div>
-
         <div id="bossWrapper" class="wrapper">
             <div id="bossContainer" class="button-row"></div>
-
             <div id="channelWrapper" class="wrapper">
                 <div id="channelContainer" class="button-row"></div>
             </div>
         </div>
 
         <div class="table-section">
-            <div class="table-header-row">
-                <h3>Active Spawns Tracker</h3>
-            </div>
+            <div class="table-header-row"><h3>Active Spawns Tracker</h3></div>
             <table>
                 <thead>
-                    <tr>
-                        <th>Map</th>
-                        <th>Boss</th>
-                        <th>Channel</th>
-                        <th>Spawntimer</th>
-                        <th>Aktion</th>
-                    </tr>
+                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Spawntimer</th><th>Aktion</th></tr>
                 </thead>
                 <tbody id="trackerTableBody">
-                    <tr>
-                        <td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td>
-                    </tr>
+                    <tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-    // --- SUPABASE VERBINDUNG ---
     const SUPABASE_URL = 'https://hrduuxzogmhasjtjcfdx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZHV1eHpvZ21oYXNqdGpjZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTA3MzQsImV4cCI6MjEwMjQ2NjczNH0.nFMhl4WBlZhIW4HJbK5FH5swY9YrSdMBL5bYzii2NQ0';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const cabalData = {
-        "Forgotten Ruin": [
-            { name: "Distichous Mongrel" },
-            { name: "Ancient Cockatrice" },
-            { name: "Monakus Karion" },
-            { name: "Virulent Cauda" }
-        ],
-        "Lakeside": [
-            { name: "Berderk Faello" }
-        ],
-        "Pontus Ferrum": [
-            { name: "TA-01 Gravis Rota (oben)" },
-            { name: "TA-01 Gravis Rota (unten)" },
-            { name: "MA-06 Quadra" },
-            { name: "FP-01 Magnus Penna (oben)" },
-            { name: "FP-01 Magnus Penna (unten)" },
-            { name: "UMD-03 Lautus Pluma" }
-        ],
-        "Porta Inferno": [
-            { name: "Manticore" },
-            { name: "Dark Kimzark" },
-            { name: "Keshapone Minisha" }
-        ],
-        "Senillinea": [
-            { name: "Enthiud (Enthuid)" },
-            { name: "Giant Wolf Leader" },
-            { name: "Meer King" },
-            { name: "Lesser Panda King" }
-        ]
+        "Forgotten Ruin": [{ name: "Distichous Mongrel" }, { name: "Ancient Cockatrice" }, { name: "Monakus Karion" }, { name: "Virulent Cauda" }],
+        "Lakeside": [{ name: "Berderk Faello" }],
+        "Pontus Ferrum": [{ name: "TA-01 Gravis Rota (oben)" }, { name: "TA-01 Gravis Rota (unten)" }, { name: "MA-06 Quadra" }, { name: "FP-01 Magnus Penna (oben)" }, { name: "FP-01 Magnus Penna (unten)" }, { name: "UMD-03 Lautus Pluma" }],
+        "Porta Inferno": [{ name: "Manticore" }, { name: "Dark Kimzark" }, { name: "Keshapone Minisha" }],
+        "Senillinea": [{ name: "Enthiud (Enthuid)" }, { name: "Giant Wolf Leader" }, { name: "Meer King" }, { name: "Lesser Panda King" }]
     };
 
     const mapContainer = document.getElementById('mapContainer');
@@ -415,306 +127,147 @@
     const channelContainer = document.getElementById('channelContainer');
     const trackerTableBody = document.getElementById('trackerTableBody');
 
-    let activeMapButton = null;
-    let activeBossButton = null;
-    let activeChannelButton = null;
-
-    let currentSelectedMap = null;
-    let currentSelectedBoss = null;
-
+    let activeMapButton = null, activeBossButton = null, activeChannelButton = null;
+    let currentSelectedMap = null, currentSelectedBoss = null;
     let activeEntries = [];
     const channelButtonMap = {};
+    const pendingUpdates = new Set(); // <--- FIX: Schützt vor Spam-Requests
 
-    // --- DATENBANK: Daten beim Start laden ---
     async function fetchSpawns() {
         const { data, error } = await _supabase.from('boss_spawns-dev').select('*');
         if (!error && data) {
             activeEntries = data.map(item => ({
-                id: item.id,
-                map: item.map,
-                boss: item.boss,
-                channel: item.channel,
-                endTime: new Date(item.end_time).getTime(),
-                isMissed: item.is_missed
+                id: item.id, map: item.map, boss: item.boss, channel: item.channel,
+                endTime: new Date(item.end_time).getTime(), isMissed: item.is_missed
             }));
             rebuildTable();
-        } else {
-            console.error('Fehler beim Laden der Spawns:', error);
         }
     }
 
-    // --- DATENBANK: Realtime-Listener ---
-    _supabase
-      .channel('public:boss_spawns-dev')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns-dev' }, payload => {
-          fetchSpawns();
-      })
-      .subscribe();
+    _supabase.channel('public:boss_spawns-dev').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns-dev' }, () => { fetchSpawns(); }).subscribe();
 
-    // Channel-Buttons (1 bis 15) generieren
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
         chBtn.className = 'channel-btn';
         chBtn.innerText = `Ch. ${i}`;
         const channelName = `Channel ${i}`;
         chBtn.dataset.channel = channelName;
-
         channelButtonMap[channelName] = chBtn;
-
         chBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-
-            if (activeChannelButton) {
-                activeChannelButton.classList.remove('active');
-            }
+            if (activeChannelButton) activeChannelButton.classList.remove('active');
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
-
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            
-            const { error } = await _supabase.from('boss_spawns-dev').upsert({
-                map: currentSelectedMap,
-                boss: currentSelectedBoss,
-                channel: channelName,
-                end_time: fourHoursLater,
-                is_missed: false
-            }, { onConflict: 'map,boss,channel' });
-
-            if (error) console.error('Fehler beim Speichern:', error);
+            await _supabase.from('boss_spawns-dev').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
         });
-
         channelContainer.appendChild(chBtn);
     }
 
-    // Map-Buttons generieren
     Object.keys(cabalData).forEach(mapName => {
         const mapBtn = document.createElement('button');
         mapBtn.className = 'map-btn';
         mapBtn.innerText = mapName;
-
         mapBtn.addEventListener('click', () => {
             if (activeMapButton === mapBtn) {
-                bossWrapper.classList.remove('visible');
-                channelWrapper.classList.remove('visible');
-                mapBtn.classList.remove('active');
-                activeMapButton = null;
-                activeBossButton = null;
-                if (activeChannelButton) activeChannelButton.classList.remove('active');
-                activeChannelButton = null;
-                currentSelectedMap = null;
-                currentSelectedBoss = null;
-                updateChannelHighlights();
-                return;
+                bossWrapper.classList.remove('visible'); channelWrapper.classList.remove('visible'); mapBtn.classList.remove('active');
+                activeMapButton = null; activeBossButton = null; activeChannelButton = null;
+                currentSelectedMap = null; currentSelectedBoss = null; updateChannelHighlights(); return;
             }
-
-            if (activeMapButton) {
-                activeMapButton.classList.remove('active');
-            }
-
-            mapBtn.classList.add('active');
-            activeMapButton = mapBtn;
-            currentSelectedMap = mapName;
-            activeBossButton = null;
-            if (activeChannelButton) activeChannelButton.classList.remove('active');
-            activeChannelButton = null;
-
-            channelWrapper.classList.remove('visible');
-
+            if (activeMapButton) activeMapButton.classList.remove('active');
+            mapBtn.classList.add('active'); activeMapButton = mapBtn; currentSelectedMap = mapName;
             bossContainer.innerHTML = '';
             cabalData[mapName].forEach(boss => {
                 const bossBtn = document.createElement('button');
                 bossBtn.className = 'boss-btn';
                 bossBtn.innerText = boss.name;
-
                 bossBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-
-                    if (activeBossButton === bossBtn) {
-                        channelWrapper.classList.toggle('visible');
-                        bossBtn.classList.toggle('active');
-                        return;
-                    }
-
-                    if (activeBossButton) {
-                        activeBossButton.classList.remove('active');
-                    }
-
-                    if (activeChannelButton) activeChannelButton.classList.remove('active');
-                    activeChannelButton = null;
-
-                    bossBtn.classList.add('active');
-                    activeBossButton = bossBtn;
-                    currentSelectedBoss = boss.name;
-                    channelWrapper.classList.add('visible');
-                    updateChannelHighlights();
+                    if (activeBossButton) activeBossButton.classList.remove('active');
+                    bossBtn.classList.add('active'); activeBossButton = bossBtn; currentSelectedBoss = boss.name;
+                    channelWrapper.classList.add('visible'); updateChannelHighlights();
                 });
-
                 bossContainer.appendChild(bossBtn);
             });
-
             bossWrapper.classList.add('visible');
-            updateChannelHighlights();
         });
-
         mapContainer.appendChild(mapBtn);
     });
 
-    // --- Globale Aktions-Funktionen ---
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        const { error } = await _supabase.from('boss_spawns-dev')
-            .update({ end_time: fourHoursLater, is_missed: false })
-            .eq('id', id);
-        if (error) console.error('Fehler beim Kill-Update:', error);
+        await _supabase.from('boss_spawns-dev').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
     };
-
-    window.forceResetTimer = async function(id) {
-        const { error } = await _supabase.rpc('manual_force_reset', { p_id: id });
-        if (error) console.error('Fehler beim Force-Reset:', error);
-    };
-
+    window.forceResetTimer = async function(id) { await _supabase.rpc('manual_force_reset', { p_id: id }); };
     window.devSetNegativeTime = async function(id) {
         const nineMinutesAgo = new Date(Date.now() - (9 * 60 * 1000)).toISOString();
-        const { error } = await _supabase.from('boss_spawns-dev')
-            .update({ end_time: nineMinutesAgo })
-            .eq('id', id);
-        if (error) console.error('Fehler beim Dev-Update:', error);
+        await _supabase.from('boss_spawns-dev').update({ end_time: nineMinutesAgo }).eq('id', id);
     };
-
-    window.deleteSpawn = async function(id) {
-        const { error } = await _supabase.from('boss_spawns-dev').delete().eq('id', id);
-        if (error) console.error('Fehler beim Löschen:', error);
-    };
+    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns-dev').delete().eq('id', id); };
 
     function updateChannelHighlights() {
-        Object.values(channelButtonMap).forEach(btn => {
-            btn.classList.remove('has-spawn');
-        });
-
+        Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
         if (!currentSelectedMap || !currentSelectedBoss) return;
-
-        const matchingEntries = activeEntries.filter(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss);
-        const activeChannels = new Set(matchingEntries.map(e => e.channel));
-
-        activeChannels.forEach(channelName => {
-            if (channelButtonMap[channelName]) {
-                channelButtonMap[channelName].classList.add('has-spawn');
-            }
-        });
+        activeEntries.filter(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss)
+                     .forEach(e => { if (channelButtonMap[e.channel]) channelButtonMap[e.channel].classList.add('has-spawn'); });
     }
 
     function formatTimeLeft(ms) {
         const isNegative = ms < 0;
         const absMs = Math.abs(ms);
         let totalSeconds = Math.floor(absMs / 1000);
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
-
-        const timeStr = [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0')
-        ].join(':');
-
+        let hours = Math.floor(totalSeconds / 3600), minutes = Math.floor((totalSeconds % 3600) / 60), seconds = totalSeconds % 60;
+        const timeStr = [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0'), seconds.toString().padStart(2, '0')].join(':');
         return isNegative ? `-${timeStr}` : timeStr;
     }
 
-    // --- Tabelle initial aufbauen ---
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
-
         if (activeEntries.length === 0) {
             trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
-            updateChannelHighlights();
-            return;
+            updateChannelHighlights(); return;
         }
-
-        activeEntries.sort((a, b) => a.endTime - b.endTime);
-
-        activeEntries.forEach(entry => {
+        activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
             const tr = document.createElement('tr');
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
-
-            tr.innerHTML = `
-                <td>${entry.map}</td>
-                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
-                <td>${entry.channel}</td>
-                <td class="timer-cell">--:--:--</td>
-                <td>
-                    <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
-                    <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                    <button class="dev-btn" onclick="devSetNegativeTime('${entry.id}')">Dev (-9m)</button>
-                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
-                </td>
-            `;
+            tr.innerHTML = `<td>${entry.map}</td><td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td><td>${entry.channel}</td><td class="timer-cell">--:--:--</td><td><button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button><button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button><button class="dev-btn" onclick="devSetNegativeTime('${entry.id}')">Dev (-9m)</button><button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button></td>`;
             trackerTableBody.appendChild(tr);
         });
-
         updateTableValues();
     }
 
-    // Sekündliche Aktualisierung der verbleibenden Zeit im DOM & Prüfung auf -10 Min
-    async function updateTableValues() {
+    // --- FIX: Traffic-Optimierte Update-Funktion ---
+    function updateTableValues() {
         if (activeEntries.length === 0) return;
-
-        const currentRows = trackerTableBody.querySelectorAll('tr[id^="row-"]');
-        if (currentRows.length !== activeEntries.length) {
-            rebuildTable();
-            return;
-        }
-
-        for (const entry of activeEntries) {
+        
+        activeEntries.forEach(entry => {
             const tr = document.getElementById(`row-${entry.id}`);
-            if (!tr) {
-                rebuildTable();
-                return;
-            }
-
+            if (!tr) return;
             const timeLeftMs = entry.endTime - Date.now();
-            const isNegative = timeLeftMs < 0;
-
-            // Automatische Prüfung auf -10 Minuten (-600.000 ms)
-           // In updateTableValues() anpassen:
-	if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed && !entry._updatingMissed) {
-    entry._updatingMissed = true;
-    entry.isMissed = true; // Lokal sofort sperren, um Mehrfach-Trigger zu verhindern
-    
-    await _supabase.from('boss_spawns-dev')
-        .update({ is_missed: true })
-        .eq('id', entry.id);
-}
+            
+            // Logik: Prüfe nur wenn verpasst, nicht bereits markiert und NICHT bereits in der Update-Schleife (pendingUpdates)
+            if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed && !pendingUpdates.has(entry.id)) {
+                pendingUpdates.add(entry.id);
+                _supabase.from('boss_spawns-dev')
+                    .update({ is_missed: true })
+                    .eq('id', entry.id)
+                    .then(() => pendingUpdates.delete(entry.id))
+                    .catch(() => pendingUpdates.delete(entry.id));
+            }
 
             tr.classList.toggle('missed-row', entry.isMissed);
-            
-            const bossTd = tr.cells[1];
-            let badgeEl = bossTd.querySelector('.missed-badge');
-            if (entry.isMissed && !badgeEl) {
-                bossTd.insertAdjacentHTML('beforeend', '<span class="missed-badge">⚠️ Verpasst</span>');
-            } else if (!entry.isMissed && badgeEl) {
-                badgeEl.remove();
-            }
-
             const cell = tr.querySelector('.timer-cell');
             cell.innerText = formatTimeLeft(timeLeftMs);
-            cell.className = `timer-cell ${isNegative ? 'negative' : ''}`;
-
+            cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
             const forceBtn = tr.querySelector('.force-btn');
-            forceBtn.disabled = !isNegative;
-        }
-
+            if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
+        });
         updateChannelHighlights();
     }
 
-    // Beim Laden Daten abrufen
     fetchSpawns();
-
-    // Sekündlicher Takt für flüssige Zeitanzeige
-    setInterval(() => {
-        updateTableValues();
-    }, 1000);
+    setInterval(updateTableValues, 1000);
     </script>
-
 </body>
 </html>
