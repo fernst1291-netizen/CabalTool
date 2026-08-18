@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabal Field Boss Tracker 1.0</title>
+    <title>Cabal Field Boss Tracker - Porta Inferno</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -40,10 +40,6 @@
         .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
         button { border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); outline: none; }
-
-        .map-btn { background-color: rgba(30, 41, 59, 0.6); color: var(--text-primary); }
-        .map-btn:hover { background-color: rgba(56, 189, 248, 0.15); border-color: var(--accent-map); color: var(--accent-map); transform: translateY(-2px); }
-        .map-btn.active { background-color: var(--accent-map); color: #0f172a; border-color: var(--accent-map); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
 
         .wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; padding-top: 0; padding-bottom: 0; border-width: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .wrapper.visible { max-height: 500px; opacity: 1; padding: 20px; border-width: 1px; margin-top: 10px; }
@@ -84,9 +80,10 @@
 <body>
 
     <div class="container">
-        <h2>Cabal Field Boss Tracker 1.0</h2>
-        <div id="mapContainer" class="button-row"></div>
-        <div id="bossWrapper" class="wrapper">
+        <h2>Cabal Boss Tracker - Porta Inferno</h2>
+        
+        <!-- Boss Auswahl (Direkt sichtbar für Porta Inferno) -->
+        <div id="bossWrapper" class="wrapper visible">
             <div id="bossContainer" class="button-row"></div>
             <div id="channelWrapper" class="wrapper">
                 <div id="channelContainer" class="button-row"></div>
@@ -97,43 +94,44 @@
             <div class="table-header-row"><h3>Active Spawns Tracker</h3></div>
             <table>
                 <thead>
-                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Spawntimer</th><th>Aktion</th></tr>
+                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Spawntimer</th><th>Action</th></tr>
                 </thead>
                 <tbody id="trackerTableBody">
-                    <tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
+                    <tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Boss -> Channel aus.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-    const SUPABASE_URL = 'https://hrduuxzogmhasjtjcfdx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZHV1eHpvZ21oYXNqdGpjZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTA3MzQsImV4cCI6MjEwMjQ2NjczNH0.nFMhl4WBlZhIW4HJbK5FH5swY9YrSdMBL5bYzii2NQ0';
+	const SUPABASE_URL = 'https://wugidpaftcwitbabyeir.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1Z2lkcGFmdGN3aXRiYWJ5ZWlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDU4NjcsImV4cCI6MjEwMjYyMTg2N30.nAEH3PcMyKAeXV5oaJ1vm3pI4wib2YXuy0MAiOPV0NE';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Nur noch Porta Inferno als feste Map hinterlegt[cite: 1]
     const cabalData = {
-        "Forgotten Ruin": [{ name: "Distichous Mongrel" }, { name: "Ancient Cockatrice" }, { name: "Monakus Karion" }, { name: "Virulent Cauda" }],
-        "Lakeside": [{ name: "Berderk Faello" }],
-        "Pontus Ferrum": [{ name: "TA-01 Gravis Rota (oben)" }, { name: "TA-01 Gravis Rota (unten)" }, { name: "MA-06 Quadra" }, { name: "FP-01 Magnus Penna (oben)" }, { name: "FP-01 Magnus Penna (unten)" }, { name: "UMD-03 Lautus Pluma" }],
-        "Porta Inferno": [{ name: "Manticore" }, { name: "Dark Kimzark" }, { name: "Keshapone Minisha" }],
-        "Senillinea": [{ name: "Enthiud (Enthuid)" }, { name: "Giant Wolf Leader" }, { name: "Meer King" }, { name: "Lesser Panda King" }]
+        "Porta Inferno": [
+            { name: "Manticore" }, 
+            { name: "Dark Kimzark" }, 
+            { name: "Keshapone Minisha" }
+        ]
     };
 
-    const mapContainer = document.getElementById('mapContainer');
     const bossWrapper = document.getElementById('bossWrapper');
     const bossContainer = document.getElementById('bossContainer');
     const channelWrapper = document.getElementById('channelWrapper');
     const channelContainer = document.getElementById('channelContainer');
     const trackerTableBody = document.getElementById('trackerTableBody');
 
-    let activeMapButton = null, activeBossButton = null, activeChannelButton = null;
-    let currentSelectedMap = null, currentSelectedBoss = null;
+    let activeBossButton = null, activeChannelButton = null;
+    let currentSelectedMap = "Porta Inferno"; // Direkt fest auf Porta Inferno gesetzt
+    let currentSelectedBoss = null;
     let activeEntries = [];
     const channelButtonMap = {};
     const pendingUpdates = new Set();
 
     async function fetchSpawns() {
-        const { data, error } = await _supabase.from('boss_spawns_2').select('*');
+        const { data, error } = await _supabase.from('boss_spawns_limited').select('*');
         if (!error && data) {
             activeEntries = data.map(item => ({
                 id: item.id, map: item.map, boss: item.boss, channel: item.channel,
@@ -143,8 +141,9 @@
         }
     }
 
-    _supabase.channel('public:boss_spawns_2').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns_2' }, () => { fetchSpawns(); }).subscribe();
+    _supabase.channel('public:boss_spawns_limited').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns_limited' }, () => { fetchSpawns(); }).subscribe();
 
+    // 15 Channels generieren
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
         chBtn.className = 'channel-btn';
@@ -158,44 +157,31 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            await _supabase.from('boss_spawns_2').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
+            await _supabase.from('boss_spawns_limited').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
     }
 
-    Object.keys(cabalData).forEach(mapName => {
-        const mapBtn = document.createElement('button');
-        mapBtn.className = 'map-btn';
-        mapBtn.innerText = mapName;
-        mapBtn.addEventListener('click', () => {
-            if (activeMapButton === mapBtn) {
-                bossWrapper.classList.remove('visible'); channelWrapper.classList.remove('visible'); mapBtn.classList.remove('active');
-                activeMapButton = null; activeBossButton = null; activeChannelButton = null;
-                currentSelectedMap = null; currentSelectedBoss = null; updateChannelHighlights(); return;
-            }
-            if (activeMapButton) activeMapButton.classList.remove('active');
-            mapBtn.classList.add('active'); activeMapButton = mapBtn; currentSelectedMap = mapName;
-            bossContainer.innerHTML = '';
-            cabalData[mapName].forEach(boss => {
-                const bossBtn = document.createElement('button');
-                bossBtn.className = 'boss-btn';
-                bossBtn.innerText = boss.name;
-                bossBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (activeBossButton) activeBossButton.classList.remove('active');
-                    bossBtn.classList.add('active'); activeBossButton = bossBtn; currentSelectedBoss = boss.name;
-                    channelWrapper.classList.add('visible'); updateChannelHighlights();
-                });
-                bossContainer.appendChild(bossBtn);
-            });
-            bossWrapper.classList.add('visible');
+    // Direkt beim Laden die Bosse für Porta Inferno rendern
+    cabalData["Porta Inferno"].forEach(boss => {
+        const bossBtn = document.createElement('button');
+        bossBtn.className = 'boss-btn';
+        bossBtn.innerText = boss.name;
+        bossBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (activeBossButton) activeBossButton.classList.remove('active');
+            bossBtn.classList.add('active'); 
+            activeBossButton = bossBtn; 
+            currentSelectedBoss = boss.name;
+            channelWrapper.classList.add('visible'); 
+            updateChannelHighlights();
         });
-        mapContainer.appendChild(mapBtn);
+        bossContainer.appendChild(bossBtn);
     });
 
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        await _supabase.from('boss_spawns_2').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
+        await _supabase.from('boss_spawns_limited').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
     };
 
     window.forceResetTimer = async function(id) {
@@ -209,17 +195,17 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
-        await _supabase.from('boss_spawns_2').update({ 
+        await _supabase.from('boss_spawns_limited').update({ 
             end_time: new Date(newEndTime).toISOString(), 
             is_missed: true 
         }).eq('id', id);
     };
 
-    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns_2').delete().eq('id', id); };
+    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns_limited').delete().eq('id', id); };
 
     function updateChannelHighlights() {
         Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
-        if (!currentSelectedMap || !currentSelectedBoss) return;
+        if (!currentSelectedBoss) return;
         activeEntries.filter(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss)
                      .forEach(e => { if (channelButtonMap[e.channel]) channelButtonMap[e.channel].classList.add('has-spawn'); });
     }
@@ -236,7 +222,7 @@
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
+            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Boss -> Channel aus.</td></tr>`;
             updateChannelHighlights(); return;
         }
         activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
@@ -245,13 +231,13 @@
             if (entry.isMissed) tr.classList.add('missed-row');
             tr.innerHTML = `
                 <td>${entry.map}</td>
-                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Missed</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td class="timer-cell">--:--:--</td>
                 <td>
                     <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
                     <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
+                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Delete</button>
                 </td>`;
             trackerTableBody.appendChild(tr);
         });
@@ -275,7 +261,7 @@
                     newEndTime += 4 * 60 * 60 * 1000;
                 }
 
-                _supabase.from('boss_spawns_2')
+                _supabase.from('boss_spawns_limited')
                     .update({ 
                         end_time: new Date(newEndTime).toISOString(), 
                         is_missed: true 
