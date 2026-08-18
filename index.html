@@ -69,6 +69,7 @@
         .missed-badge { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; border-radius: 4px; margin-left: 8px; font-weight: 600; display: inline-block; }
         .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
         .timer-cell.negative { color: var(--accent-danger); }
+        
         .kill-btn, .force-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; }
         .kill-btn { background-color: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.4); }
         .kill-btn:hover { background-color: var(--accent-kill); color: #713f12; }
@@ -242,7 +243,16 @@
             const tr = document.createElement('tr');
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
-            tr.innerHTML = `<td>${entry.map}</td><td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td><td>${entry.channel}</td><td class="timer-cell">--:--:--</td><td><button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button><button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button><button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button></td>`;
+            tr.innerHTML = `
+                <td>${entry.map}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
+                <td>${entry.channel}</td>
+                <td class="timer-cell">--:--:--</td>
+                <td>
+                    <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
+                    <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
+                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
+                </td>`;
             trackerTableBody.appendChild(tr);
         });
         updateTableValues();
@@ -256,10 +266,21 @@
             if (!tr) return;
             const timeLeftMs = entry.endTime - Date.now();
             
-            if (timeLeftMs <= -10 * 60 * 1000 && !entry.isMissed && !pendingUpdates.has(entry.id)) {
+            // Automatischer Reset, wenn der Timer -10 Minuten im Minus überschreitet
+            if (timeLeftMs <= -10 * 60 * 1000 && !pendingUpdates.has(entry.id)) {
                 pendingUpdates.add(entry.id);
+                
+                let newEndTime = entry.endTime;
+                const now = Date.now();
+                while (newEndTime <= now) {
+                    newEndTime += 4 * 60 * 60 * 1000;
+                }
+
                 _supabase.from('boss_spawns')
-                    .update({ is_missed: true })
+                    .update({ 
+                        end_time: new Date(newEndTime).toISOString(), 
+                        is_missed: true 
+                    })
                     .eq('id', entry.id)
                     .then(() => pendingUpdates.delete(entry.id))
                     .catch(() => pendingUpdates.delete(entry.id));
