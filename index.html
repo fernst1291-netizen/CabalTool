@@ -134,18 +134,32 @@
     const channelButtonMap = {};
 
     async function fetchSpawns() {
-        const { data, error } = await _supabase.from('boss_spawns-dev').select('*');
-        if (!error && data) {
+        console.log("Lade Daten von Supabase...");
+        const { data, error } = await _supabase.from('boss_spawns_2').select('*').range(0, 999);
+        
+        if (error) {
+            console.error("Supabase Fehler:", error);
+            return;
+        }
+
+        console.log("Empfangene Rohdaten von Supabase:", data);
+        if (data) {
+            console.log("Anzahl Zeilen in DB:", data.length);
             activeEntries = data.map(item => ({
-                id: item.id, map: item.map, boss: item.boss, channel: item.channel,
-                endTime: new Date(item.end_time).getTime(), isMissed: item.is_missed,
+                id: item.id, 
+                map: item.map, 
+                boss: item.boss, 
+                channel: item.channel,
+                endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
+                isMissed: item.is_missed || false,
                 missedCount: item.missed_count || 0
             }));
+            console.log("Verarbeitete activeEntries Länge:", activeEntries.length);
             rebuildTable();
         }
     }
 
-    _supabase.channel('public:boss_spawns-dev').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns-dev' }, () => { fetchSpawns(); }).subscribe();
+    _supabase.channel('public:boss_spawns_2').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns_2' }, () => { fetchSpawns(); }).subscribe();
 
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
@@ -160,7 +174,7 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            await _supabase.from('boss_spawns-dev').upsert({ 
+            await _supabase.from('boss_spawns_2').upsert({ 
                 map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
                 end_time: fourHoursLater, is_missed: false, missed_count: 0 
             }, { onConflict: 'map,boss,channel' });
@@ -200,7 +214,7 @@
 
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        await _supabase.from('boss_spawns-dev').update({ 
+        await _supabase.from('boss_spawns_2').update({ 
             end_time: fourHoursLater, 
             is_missed: false, 
             missed_count: 0 
@@ -218,7 +232,7 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
-        await _supabase.from('boss_spawns-dev').update({ 
+        await _supabase.from('boss_spawns_2').update({ 
             end_time: new Date(newEndTime).toISOString(), 
             is_missed: true,
             missed_count: (entry.missedCount || 0) + 1
@@ -226,7 +240,7 @@
     };
 
     window.deleteSpawn = async function(id) { 
-        await _supabase.from('boss_spawns-dev').delete().eq('id', id); 
+        await _supabase.from('boss_spawns_2').delete().eq('id', id); 
     };
 
     function updateChannelHighlights() {
