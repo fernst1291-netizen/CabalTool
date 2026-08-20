@@ -68,6 +68,7 @@
         tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
         tr.missed-row td { background-color: rgba(239, 68, 68, 0.05); }
         .missed-badge { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; border-radius: 4px; margin-left: 8px; font-weight: 600; display: inline-block; }
+        .missed-count-badge { font-family: monospace; background: rgba(255, 255, 255, 0.05); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-weight: 600; }
         .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
         .timer-cell.negative { color: var(--accent-danger); }
         
@@ -100,10 +101,10 @@
             <div class="table-header-row"><h3>Active Spawns Tracker</h3></div>
             <table>
                 <thead>
-                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Spawntimer</th><th>Aktion</th></tr>
+                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Missed Count</th><th>Spawntimer</th><th>Aktion</th></tr>
                 </thead>
                 <tbody id="trackerTableBody">
-                    <tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
+                    <tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -133,14 +134,14 @@
     let currentSelectedMap = null, currentSelectedBoss = null;
     let activeEntries = [];
     const channelButtonMap = {};
-    const pendingUpdates = new Set();
 
     async function fetchSpawns() {
         const { data, error } = await _supabase.from('boss_spawns-dev').select('*');
         if (!error && data) {
             activeEntries = data.map(item => ({
                 id: item.id, map: item.map, boss: item.boss, channel: item.channel,
-                endTime: new Date(item.end_time).getTime(), isMissed: item.is_missed
+                endTime: new Date(item.end_time).getTime(), isMissed: item.is_missed,
+                missedCount: item.missed_count || 0
             }));
             rebuildTable();
         }
@@ -161,7 +162,11 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            await _supabase.from('boss_spawns-dev').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
+            // Channel-Klick setzt missed_count auf 0 zurück
+            await _supabase.from('boss_spawns-dev').upsert({ 
+                map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
+                end_time: fourHoursLater, is_missed: false, missed_count: 0 
+            }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
     }
@@ -198,7 +203,12 @@
 
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        await _supabase.from('boss_spawns-dev').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
+        // Kill-Button setzt missed_count auf 0 zurück
+        await _supabase.from('boss_spawns-dev').update({ 
+            end_time: fourHoursLater, 
+            is_missed: false, 
+            missed_count: 0 
+        }).eq('id', id);
     };
 
     window.forceResetTimer = async function(id) {
@@ -212,9 +222,11 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
+        // Force-Button inkrementiert den Missed Count (+1)
         await _supabase.from('boss_spawns-dev').update({ 
             end_time: new Date(newEndTime).toISOString(), 
-            is_missed: true 
+            is_missed: true,
+            missed_count: (entry.missedCount || 0) + 1
         }).eq('id', id);
     };
 
@@ -226,7 +238,9 @@
         }).eq('id', id);
     };
 
-    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns-dev').delete().eq('id', id); };
+    window.deleteSpawn = async function(id) { 
+        await _supabase.from('boss_spawns-dev').delete().eq('id', id); 
+    };
 
     function updateChannelHighlights() {
         Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
@@ -247,7 +261,7 @@
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
+            trackerTableBody.innerHTML = `<tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
             updateChannelHighlights(); return;
         }
         activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
@@ -258,6 +272,7 @@
                 <td>${entry.map}</td>
                 <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
+                <td><span class="missed-count-badge">${entry.missedCount}</span></td>
                 <td class="timer-cell">--:--:--</td>
                 <td>
                     <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
@@ -271,31 +286,28 @@
     }
 
     function updateTableValues() {
-    if (activeEntries.length === 0) return;
-    
-    activeEntries.forEach(entry => {
-        const tr = document.getElementById(`row-${entry.id}`);
-        if (!tr) return;
+        if (activeEntries.length === 0) return;
         
-        const timeLeftMs = entry.endTime - Date.now();
+        activeEntries.forEach(entry => {
+            const tr = document.getElementById(`row-${entry.id}`);
+            if (!tr) return;
+            
+            const timeLeftMs = entry.endTime - Date.now();
+            
+            tr.classList.toggle('missed-row', entry.isMissed);
+            
+            const cell = tr.querySelector('.timer-cell');
+            if (cell) {
+                cell.innerText = formatTimeLeft(timeLeftMs);
+                cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
+            }
+            
+            const forceBtn = tr.querySelector('.force-btn');
+            if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
+        });
         
-        // --- NUR NOCH VISUELLE ANZEIGE, KEIN AUTOMATISCHER UPDATE-BEFEHL MEHR ---
-        
-        tr.classList.toggle('missed-row', entry.isMissed);
-        
-        const cell = tr.querySelector('.timer-cell');
-        if (cell) {
-            cell.innerText = formatTimeLeft(timeLeftMs);
-            cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
-        }
-        
-        const forceBtn = tr.querySelector('.force-btn');
-        if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
-    });
-    
-    // Highlights für Channel-Buttons aktualisieren
-    updateChannelHighlights();
-}
+        updateChannelHighlights();
+    }
 
     fetchSpawns();
     setInterval(updateTableValues, 1000);
