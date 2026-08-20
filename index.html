@@ -219,9 +219,9 @@
     };
 
     window.testTimer = async function(id) {
-        const nineMinutesAgo = new Date(Date.now() - (9 * 60 * 1000)).toISOString();
+        const eightMinutesAgo = new Date(Date.now() - (8 * 60 * 1000)).toISOString();
         await _supabase.from('boss_spawns-dev').update({ 
-            end_time: nineMinutesAgo, 
+            end_time: eightMinutesAgo, 
             is_missed: false 
         }).eq('id', id);
     };
@@ -262,7 +262,7 @@
                 <td>
                     <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
                     <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                    <button class="test-btn" onclick="testTimer('${entry.id}')">-9 Min</button>
+                    <button class="test-btn" onclick="testTimer('${entry.id}')">-8 Min</button>
                     <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
                 </td>`;
             trackerTableBody.appendChild(tr);
@@ -271,42 +271,31 @@
     }
 
     function updateTableValues() {
-        if (activeEntries.length === 0) return;
+    if (activeEntries.length === 0) return;
+    
+    activeEntries.forEach(entry => {
+        const tr = document.getElementById(`row-${entry.id}`);
+        if (!tr) return;
         
-        activeEntries.forEach(entry => {
-            const tr = document.getElementById(`row-${entry.id}`);
-            if (!tr) return;
-            const timeLeftMs = entry.endTime - Date.now();
-            
-            // Automatischer Reset, wenn der Timer -10 Minuten im Minus überschreitet
-            if (timeLeftMs <= -10 * 60 * 1000 && !pendingUpdates.has(entry.id)) {
-                pendingUpdates.add(entry.id);
-                
-                let newEndTime = entry.endTime;
-                const now = Date.now();
-                while (newEndTime <= now) {
-                    newEndTime += 4 * 60 * 60 * 1000;
-                }
-
-                _supabase.from('boss_spawns-dev')
-                    .update({ 
-                        end_time: new Date(newEndTime).toISOString(), 
-                        is_missed: true 
-                    })
-                    .eq('id', entry.id)
-                    .then(() => pendingUpdates.delete(entry.id))
-                    .catch(() => pendingUpdates.delete(entry.id));
-            }
-
-            tr.classList.toggle('missed-row', entry.isMissed);
-            const cell = tr.querySelector('.timer-cell');
+        const timeLeftMs = entry.endTime - Date.now();
+        
+        // --- NUR NOCH VISUELLE ANZEIGE, KEIN AUTOMATISCHER UPDATE-BEFEHL MEHR ---
+        
+        tr.classList.toggle('missed-row', entry.isMissed);
+        
+        const cell = tr.querySelector('.timer-cell');
+        if (cell) {
             cell.innerText = formatTimeLeft(timeLeftMs);
             cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
-            const forceBtn = tr.querySelector('.force-btn');
-            if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
-        });
-        updateChannelHighlights();
-    }
+        }
+        
+        const forceBtn = tr.querySelector('.force-btn');
+        if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
+    });
+    
+    // Highlights für Channel-Buttons aktualisieren
+    updateChannelHighlights();
+}
 
     fetchSpawns();
     setInterval(updateTableValues, 1000);
