@@ -71,7 +71,7 @@
         .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
         .timer-cell.negative { color: var(--accent-danger); }
         
-        .action-cell { display: flex; gap: 6px; align-items: center; }
+        .action-buttons { display: flex; gap: 6px; align-items: center; }
         .kill-btn, .force-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin: 0; }
         .kill-btn { background-color: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.4); }
         .kill-btn:hover { background-color: var(--accent-kill); color: #713f12; }
@@ -261,10 +261,12 @@
                 <td>${entry.channel}</td>
                 <td><span class="missed-count-badge">${entry.missedCount}</span></td>
                 <td class="timer-cell">--:--:--</td>
-                <td class="action-cell">
-                    <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
-                    <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
+                <td>
+                    <div class="action-buttons">
+                        <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
+                        <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
+                        <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
+                    </div>
                 </td>`;
             trackerTableBody.appendChild(tr);
         });
