@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabal Field Boss Tracker - Porta Inferno</title>
+    <title>Cabal Field Boss Tracker 1.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -41,6 +41,10 @@
 
         button { border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); outline: none; }
 
+        .map-btn { background-color: rgba(30, 41, 59, 0.6); color: var(--text-primary); }
+        .map-btn:hover { background-color: rgba(56, 189, 248, 0.15); border-color: var(--accent-map); color: var(--accent-map); transform: translateY(-2px); }
+        .map-btn.active { background-color: var(--accent-map); color: #0f172a; border-color: var(--accent-map); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+
         .wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; padding-top: 0; padding-bottom: 0; border-width: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .wrapper.visible { max-height: 500px; opacity: 1; padding: 20px; border-width: 1px; margin-top: 10px; }
 
@@ -63,10 +67,12 @@
         tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
         tr.missed-row td { background-color: rgba(239, 68, 68, 0.05); }
         .missed-badge { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; border-radius: 4px; margin-left: 8px; font-weight: 600; display: inline-block; }
+        .missed-count-badge { font-family: monospace; background: rgba(255, 255, 255, 0.05); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-weight: 600; }
         .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
         .timer-cell.negative { color: var(--accent-danger); }
         
-        .kill-btn, .force-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin-right: 4px; margin-bottom: 4px; }
+        .action-buttons { display: flex; gap: 6px; align-items: center; }
+        .kill-btn, .force-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin: 0; }
         .kill-btn { background-color: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.4); }
         .kill-btn:hover { background-color: var(--accent-kill); color: #713f12; }
         .force-btn { background-color: rgba(59, 130, 246, 0.2); color: #bfdbfe; border: 1px solid rgba(59, 130, 246, 0.4); }
@@ -80,10 +86,9 @@
 <body>
 
     <div class="container">
-        <h2>Cabal Boss Tracker - Porta Inferno</h2>
-        
-        <!-- Boss Auswahl (Direkt sichtbar für Porta Inferno) -->
-        <div id="bossWrapper" class="wrapper visible">
+        <h2>Cabal Field Boss Tracker 1.0</h2>
+        <div id="mapContainer" class="button-row"></div>
+        <div id="bossWrapper" class="wrapper">
             <div id="bossContainer" class="button-row"></div>
             <div id="channelWrapper" class="wrapper">
                 <div id="channelContainer" class="button-row"></div>
@@ -91,59 +96,68 @@
         </div>
 
         <div class="table-section">
-            <div class="table-header-row"><h3>Active Spawns Tracker</h3></div>
+            <div class="table-header-row"><h3>Active Spawn Tracker</h3></div>
             <table>
                 <thead>
-                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Spawntimer</th><th>Action</th></tr>
+                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Missed Count</th><th>Spawntimer</th><th>Action</th></tr>
                 </thead>
                 <tbody id="trackerTableBody">
-                    <tr><td colspan="5" class="empty-table">No active records. Select a boss -> Channel.</td></tr>
+                    <tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-	const SUPABASE_URL = 'https://wugidpaftcwitbabyeir.supabase.co';
+    const SUPABASE_URL = 'https://wugidpaftcwitbabyeir.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1Z2lkcGFmdGN3aXRiYWJ5ZWlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDU4NjcsImV4cCI6MjEwMjYyMTg2N30.nAEH3PcMyKAeXV5oaJ1vm3pI4wib2YXuy0MAiOPV0NE';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Nur noch Porta Inferno als feste Map hinterlegt[cite: 1]
+    // Auf Porta Inferno beschränkt
     const cabalData = {
-        "Porta Inferno": [
-            { name: "Manticore" }, 
-            { name: "Dark Kimzark" }, 
-            { name: "Keshapone Minisha" }
-        ]
+        "Porta Inferno": [{ name: "Manticore" }, { name: "Dark Kimzark" }, { name: "Keshapone Minisha" }]
     };
 
+    const mapContainer = document.getElementById('mapContainer');
     const bossWrapper = document.getElementById('bossWrapper');
     const bossContainer = document.getElementById('bossContainer');
     const channelWrapper = document.getElementById('channelWrapper');
     const channelContainer = document.getElementById('channelContainer');
     const trackerTableBody = document.getElementById('trackerTableBody');
 
-    let activeBossButton = null, activeChannelButton = null;
-    let currentSelectedMap = "Porta Inferno"; // Direkt fest auf Porta Inferno gesetzt
-    let currentSelectedBoss = null;
+    let activeMapButton = null, activeBossButton = null, activeChannelButton = null;
+    let currentSelectedMap = null, currentSelectedBoss = null;
     let activeEntries = [];
     const channelButtonMap = {};
-    const pendingUpdates = new Set();
 
     async function fetchSpawns() {
-        const { data, error } = await _supabase.from('boss_spawns_limited').select('*');
-        if (!error && data) {
+        console.log("Lade Daten von Supabase...");
+        const { data, error } = await _supabase.from('boss_spawns_limited').select('*').range(0, 999);
+        
+        if (error) {
+            console.error("Supabase Fehler:", error);
+            return;
+        }
+
+        console.log("Empfangene Rohdaten von Supabase:", data);
+        if (data) {
+            console.log("Anzahl Zeilen in DB:", data.length);
             activeEntries = data.map(item => ({
-                id: item.id, map: item.map, boss: item.boss, channel: item.channel,
-                endTime: new Date(item.end_time).getTime(), isMissed: item.is_missed
+                id: item.id, 
+                map: item.map, 
+                boss: item.boss, 
+                channel: item.channel,
+                endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
+                isMissed: item.is_missed || false,
+                missedCount: item.missed_count || 0
             }));
+            console.log("Verarbeitete activeEntries Länge:", activeEntries.length);
             rebuildTable();
         }
     }
 
     _supabase.channel('public:boss_spawns_limited').on('postgres_changes', { event: '*', schema: 'public', table: 'boss_spawns_limited' }, () => { fetchSpawns(); }).subscribe();
 
-    // 15 Channels generieren
     for (let i = 1; i <= 15; i++) {
         const chBtn = document.createElement('button');
         chBtn.className = 'channel-btn';
@@ -157,31 +171,51 @@
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-            await _supabase.from('boss_spawns_limited').upsert({ map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, end_time: fourHoursLater, is_missed: false }, { onConflict: 'map,boss,channel' });
+            await _supabase.from('boss_spawns_limited').upsert({ 
+                map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
+                end_time: fourHoursLater, is_missed: false, missed_count: 0 
+            }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
     }
 
-    // Direkt beim Laden die Bosse für Porta Inferno rendern
-    cabalData["Porta Inferno"].forEach(boss => {
-        const bossBtn = document.createElement('button');
-        bossBtn.className = 'boss-btn';
-        bossBtn.innerText = boss.name;
-        bossBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (activeBossButton) activeBossButton.classList.remove('active');
-            bossBtn.classList.add('active'); 
-            activeBossButton = bossBtn; 
-            currentSelectedBoss = boss.name;
-            channelWrapper.classList.add('visible'); 
-            updateChannelHighlights();
+    Object.keys(cabalData).forEach(mapName => {
+        const mapBtn = document.createElement('button');
+        mapBtn.className = 'map-btn';
+        mapBtn.innerText = mapName;
+        mapBtn.addEventListener('click', () => {
+            if (activeMapButton === mapBtn) {
+                bossWrapper.classList.remove('visible'); channelWrapper.classList.remove('visible'); mapBtn.classList.remove('active');
+                activeMapButton = null; activeBossButton = null; activeChannelButton = null;
+                currentSelectedMap = null; currentSelectedBoss = null; updateChannelHighlights(); return;
+            }
+            if (activeMapButton) activeMapButton.classList.remove('active');
+            mapBtn.classList.add('active'); activeMapButton = mapBtn; currentSelectedMap = mapName;
+            bossContainer.innerHTML = '';
+            cabalData[mapName].forEach(boss => {
+                const bossBtn = document.createElement('button');
+                bossBtn.className = 'boss-btn';
+                bossBtn.innerText = boss.name;
+                bossBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (activeBossButton) activeBossButton.classList.remove('active');
+                    bossBtn.classList.add('active'); activeBossButton = bossBtn; currentSelectedBoss = boss.name;
+                    channelWrapper.classList.add('visible'); updateChannelHighlights();
+                });
+                bossContainer.appendChild(bossBtn);
+            });
+            bossWrapper.classList.add('visible');
         });
-        bossContainer.appendChild(bossBtn);
+        mapContainer.appendChild(mapBtn);
     });
 
     window.killTimer = async function(id) {
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
-        await _supabase.from('boss_spawns_limited').update({ end_time: fourHoursLater, is_missed: false }).eq('id', id);
+        await _supabase.from('boss_spawns_limited').update({ 
+            end_time: fourHoursLater, 
+            is_missed: false, 
+            missed_count: 0 
+        }).eq('id', id);
     };
 
     window.forceResetTimer = async function(id) {
@@ -197,15 +231,18 @@
 
         await _supabase.from('boss_spawns_limited').update({ 
             end_time: new Date(newEndTime).toISOString(), 
-            is_missed: true 
+            is_missed: true,
+            missed_count: (entry.missedCount || 0) + 1
         }).eq('id', id);
     };
 
-    window.deleteSpawn = async function(id) { await _supabase.from('boss_spawns_limited').delete().eq('id', id); };
+    window.deleteSpawn = async function(id) { 
+        await _supabase.from('boss_spawns_limited').delete().eq('id', id); 
+    };
 
     function updateChannelHighlights() {
         Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
-        if (!currentSelectedBoss) return;
+        if (!currentSelectedMap || !currentSelectedBoss) return;
         activeEntries.filter(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss)
                      .forEach(e => { if (channelButtonMap[e.channel]) channelButtonMap[e.channel].classList.add('has-spawn'); });
     }
@@ -222,7 +259,7 @@
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="5" class="empty-table">No active records. Select a boss -> Channel.</td></tr>`;
+            trackerTableBody.innerHTML = `<tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
             updateChannelHighlights(); return;
         }
         activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
@@ -231,13 +268,16 @@
             if (entry.isMissed) tr.classList.add('missed-row');
             tr.innerHTML = `
                 <td>${entry.map}</td>
-                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Missed</span>' : ''}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
+                <td><span class="missed-count-badge">${entry.missedCount}</span></td>
                 <td class="timer-cell">--:--:--</td>
                 <td>
-                    <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
-                    <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                    <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Delete</button>
+                    <div class="action-buttons">
+                        <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
+                        <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force Miss</button>
+                        <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ delete</button>
+                    </div>
                 </td>`;
             trackerTableBody.appendChild(tr);
         });
@@ -250,34 +290,21 @@
         activeEntries.forEach(entry => {
             const tr = document.getElementById(`row-${entry.id}`);
             if (!tr) return;
+            
             const timeLeftMs = entry.endTime - Date.now();
             
-            if (timeLeftMs <= -10 * 60 * 1000 && !pendingUpdates.has(entry.id)) {
-                pendingUpdates.add(entry.id);
-                
-                let newEndTime = entry.endTime;
-                const now = Date.now();
-                while (newEndTime <= now) {
-                    newEndTime += 4 * 60 * 60 * 1000;
-                }
-
-                _supabase.from('boss_spawns_limited')
-                    .update({ 
-                        end_time: new Date(newEndTime).toISOString(), 
-                        is_missed: true 
-                    })
-                    .eq('id', entry.id)
-                    .then(() => pendingUpdates.delete(entry.id))
-                    .catch(() => pendingUpdates.delete(entry.id));
-            }
-
             tr.classList.toggle('missed-row', entry.isMissed);
+            
             const cell = tr.querySelector('.timer-cell');
-            cell.innerText = formatTimeLeft(timeLeftMs);
-            cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
+            if (cell) {
+                cell.innerText = formatTimeLeft(timeLeftMs);
+                cell.className = `timer-cell ${timeLeftMs < 0 ? 'negative' : ''}`;
+            }
+            
             const forceBtn = tr.querySelector('.force-btn');
             if (forceBtn) forceBtn.disabled = !(timeLeftMs < 0);
         });
+        
         updateChannelHighlights();
     }
 
