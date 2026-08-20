@@ -268,7 +268,7 @@
             if (entry.isMissed) tr.classList.add('missed-row');
             tr.innerHTML = `
                 <td>${entry.map}</td>
-                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
+                <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Missed</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td><span class="missed-count-badge">${entry.missedCount}</span></td>
                 <td class="timer-cell">--:--:--</td>
