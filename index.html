@@ -5,82 +5,394 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cabal Field Boss Tracker 1.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0f12;
-            --panel-bg: rgba(22, 27, 34, 0.85);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #f0f6fc;
-            --text-secondary: #8b949e;
+            --bg-color: #06080c;
+            --panel-bg: rgba(13, 17, 23, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.07);
+            --panel-border-glow: rgba(56, 189, 248, 0.25);
             
-            --accent-map: #38bdf8;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            
+            --accent-map: #0ea5e9;
             --accent-boss: #a855f7;
             --accent-channel: #10b981;
             --accent-kill: #eab308;
             --accent-force: #3b82f6;
-            --accent-danger: #ef4444;
+            --accent-danger: #f43f5e;
             
-            --transition-speed: 0.3s;
+            --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
-            background-image: radial-gradient(circle at 50% 0%, #1f293d 0%, var(--bg-color) 70%);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #0b0f17 0%, var(--bg-color) 100%);
             color: var(--text-primary);
             margin: 0;
             padding: 40px 20px;
             min-height: 100vh;
         }
 
-        h2, h3 { text-align: center; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            text-transform: uppercase;
+            font-size: 1.75rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        h3 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
 
-        .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
 
-        button { border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(10px); outline: none; }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
 
-        .map-btn { background-color: rgba(30, 41, 59, 0.6); color: var(--text-primary); }
-        .map-btn:hover { background-color: rgba(56, 189, 248, 0.15); border-color: var(--accent-map); color: var(--accent-map); transform: translateY(-2px); }
-        .map-btn.active { background-color: var(--accent-map); color: #0f172a; border-color: var(--accent-map); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        /* Basis-Buttons */
+        button {
+            border: 1px solid var(--panel-border);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(12px);
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        .wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); max-height: 0; opacity: 0; overflow: hidden; margin-top: 0; padding-top: 0; padding-bottom: 0; border-width: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .wrapper.visible { max-height: 500px; opacity: 1; padding: 20px; border-width: 1px; margin-top: 10px; }
+        /* Map Buttons */
+        .map-btn {
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-secondary);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .map-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: rgba(14, 165, 233, 0.4);
+            color: var(--accent-map);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+        }
+        .map-btn.active {
+            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+            font-weight: 600;
+        }
 
-        .boss-btn { background-color: rgba(45, 27, 105, 0.4); color: #e9d5ff; border-color: rgba(168, 85, 247, 0.2); }
-        .boss-btn:hover { background-color: rgba(168, 85, 247, 0.2); border-color: var(--accent-boss); color: #ffffff; transform: translateY(-2px); }
-        .boss-btn.active { background-color: var(--accent-boss); color: #ffffff; border-color: var(--accent-boss); box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+        /* Wrapper Animation */
+        .wrapper {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 0;
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-top: 0;
+            border-width: 0;
+            transition: var(--transition-smooth);
+        }
+        .wrapper.visible {
+            max-height: 600px;
+            opacity: 1;
+            padding: 22px;
+            border-width: 1px;
+            border-color: var(--panel-border);
+            margin-top: 4px;
+        }
 
-        .channel-btn { background-color: rgba(6, 78, 59, 0.4); color: #d1fae5; border-color: rgba(16, 185, 129, 0.2); padding: 8px 14px; font-size: 13px; position: relative; }
-        .channel-btn:hover { background-color: var(--accent-channel); color: #022c22; border-color: var(--accent-channel); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
-        .channel-btn.active { background-color: var(--accent-channel); color: #022c22; border-color: var(--accent-channel); box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
-        .channel-btn.has-spawn { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
-        .channel-btn.has-spawn::after { content: ''; position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background-color: #38bdf8; border-radius: 50%; box-shadow: 0 0 6px #38bdf8; }
+        /* Boss Buttons */
+        .boss-btn {
+            background: rgba(30, 27, 75, 0.4);
+            color: #d8b4fe;
+            border-color: rgba(168, 85, 247, 0.15);
+        }
+        .boss-btn:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.5);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+        }
+        .boss-btn.active {
+            background: linear-gradient(135deg, #9333ea, #a855f7);
+            color: #ffffff;
+            border-color: #c084fc;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            font-weight: 600;
+        }
 
-        .table-section { margin-top: 30px; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .table-header-row h3 { margin: 0; text-align: left; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-        th { color: var(--text-secondary); font-weight: 600; background-color: rgba(255, 255, 255, 0.02); }
-        tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
-        tr.missed-row td { background-color: rgba(239, 68, 68, 0.05); }
-        .missed-badge { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; border-radius: 4px; margin-left: 8px; font-weight: 600; display: inline-block; }
-        .missed-count-badge { font-family: monospace; background: rgba(255, 255, 255, 0.05); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-weight: 600; }
-        .timer-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; }
-        .timer-cell.negative { color: var(--accent-danger); }
+        /* Channel Buttons */
+        .channel-btn {
+            background: rgba(6, 78, 59, 0.3);
+            color: #a7f3d0;
+            border-color: rgba(16, 185, 129, 0.15);
+            padding: 8px 14px;
+            font-size: 13px;
+            position: relative;
+        }
+        .channel-btn:hover {
+            background: rgba(16, 185, 129, 0.25);
+            border-color: var(--accent-channel);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+            transform: translateY(-1px);
+        }
+        .channel-btn.active {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #ffffff;
+            border-color: #34d399;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            font-weight: 600;
+        }
+        .channel-btn.has-spawn {
+            border-color: var(--accent-map);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .channel-btn.has-spawn::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-map);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-map);
+        }
+
+        /* Table Section */
+        .table-section {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 24px;
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            overflow-x: auto;
+        }
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--panel-border);
+        }
+        .table-header-row h3 {
+            margin: 0;
+            text-align: left;
+        }
         
-        .action-buttons { display: flex; gap: 6px; align-items: center; }
-        .kill-btn, .force-btn, .delete-btn { padding: 5px 10px; font-size: 12px; border-radius: 6px; margin: 0; }
-        .kill-btn { background-color: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.4); }
-        .kill-btn:hover { background-color: var(--accent-kill); color: #713f12; }
-        .force-btn { background-color: rgba(59, 130, 246, 0.2); color: #bfdbfe; border: 1px solid rgba(59, 130, 246, 0.4); }
-        .force-btn:hover:not(:disabled) { background-color: var(--accent-force); color: #ffffff; }
-        .force-btn:disabled { background-color: rgba(255, 255, 255, 0.03); color: var(--text-secondary); cursor: not-allowed; opacity: 0.5; }
-        .delete-btn { background-color: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .delete-btn:hover { background-color: var(--accent-danger); color: #ffffff; }
-        .empty-table { text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic; }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+        th, td {
+            padding: 14px 16px;
+            font-size: 13.5px;
+        }
+        th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.015);
+            border-bottom: 1px solid var(--panel-border);
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 11.5px;
+            letter-spacing: 0.8px;
+        }
+        th:first-child { border-top-left-radius: 8px; }
+        th:last-child { border-top-right-radius: 8px; }
+
+        tr td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: background 0.2s ease;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.025);
+        }
+        tr.missed-row td {
+            background-color: rgba(244, 63, 94, 0.04);
+        }
+        tr.missed-row:hover td {
+            background-color: rgba(244, 63, 94, 0.08);
+        }
+        
+        .missed-badge {
+            background-color: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+            margin-left: 10px;
+            font-weight: 600;
+            display: inline-block;
+            letter-spacing: 0.3px;
+        }
+        .missed-count-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+            font-weight: 600;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+        
+        .timestamp-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .timer-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14.5px;
+            font-weight: 600;
+            color: #38bdf8;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+        .timer-cell.negative {
+            color: var(--accent-danger);
+            text-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
+        }
+        
+        .action-cell {
+            white-space: nowrap;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        
+        /* Action Buttons - Ausrichtung & Größen */
+        .kill-btn, .force-btn, .delete-btn {
+            border-radius: 6px;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        /* Etwas größerer Kill-Button für optimales Klicken */
+        .kill-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            background-color: rgba(234, 179, 8, 0.15);
+            color: #fde047;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+        .kill-btn:hover {
+            background-color: var(--accent-kill);
+            color: #422006;
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+        }
+        
+        .force-btn {
+            padding: 7px 12px;
+            font-size: 12px;
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .force-btn:hover:not(:disabled) {
+            background-color: var(--accent-force);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+        }
+        .force-btn:disabled {
+            background-color: rgba(255, 255, 255, 0.02);
+            color: #475569;
+            border-color: rgba(255, 255, 255, 0.03);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .delete-btn {
+            padding: 7px 12px;
+            font-size: 12px;
+            background-color: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+        .delete-btn:hover {
+            background-color: var(--accent-danger);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+        }
+        
+        .empty-table {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-style: italic;
+            white-space: normal;
+        }
+
+        /* Scrollbar Optimierung */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(6, 8, 12, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -96,13 +408,23 @@
         </div>
 
         <div class="table-section">
-            <div class="table-header-row"><h3>Active Spawn Tracker</h3></div>
+            <div class="table-header-row">
+                <h3>Active Spawns Tracker</h3>
+            </div>
             <table>
                 <thead>
-                    <tr><th>Map</th><th>Boss</th><th>Channel</th><th>Missed Count</th><th>Spawntimer</th><th>Aktion</th></tr>
+                    <tr>
+                        <th>Map</th>
+                        <th>Boss</th>
+                        <th>Channel</th>
+                        <th>Missed Count</th>
+                        <th>Letzter Kill</th>
+                        <th>Spawntimer</th>
+                        <th>Aktion</th>
+                    </tr>
                 </thead>
                 <tbody id="trackerTableBody">
-                    <tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
+                    <tr><td colspan="7" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -142,19 +464,17 @@
             return;
         }
 
-        console.log("Empfangene Rohdaten von Supabase:", data);
         if (data) {
-            console.log("Anzahl Zeilen in DB:", data.length);
             activeEntries = data.map(item => ({
                 id: item.id, 
                 map: item.map, 
                 boss: item.boss, 
                 channel: item.channel,
                 endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
+                lastKillTime: item.last_kill_time ? new Date(item.last_kill_time).getTime() : 0,
                 isMissed: item.is_missed || false,
                 missedCount: item.missed_count || 0
             }));
-            console.log("Verarbeitete activeEntries Länge:", activeEntries.length);
             rebuildTable();
         }
     }
@@ -173,10 +493,11 @@
             if (activeChannelButton) activeChannelButton.classList.remove('active');
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
+            const nowIso = new Date().toISOString();
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
             await _supabase.from('boss_spawns_2').upsert({ 
                 map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
-                end_time: fourHoursLater, is_missed: false, missed_count: 0 
+                end_time: fourHoursLater, last_kill_time: nowIso, is_missed: false, missed_count: 0 
             }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
@@ -213,9 +534,11 @@
     });
 
     window.killTimer = async function(id) {
+        const nowIso = new Date().toISOString();
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         await _supabase.from('boss_spawns_2').update({ 
             end_time: fourHoursLater, 
+            last_kill_time: nowIso,
             is_missed: false, 
             missed_count: 0 
         }).eq('id', id);
@@ -259,23 +582,37 @@
         return isNegative ? `-${timeStr}` : timeStr;
     }
 
+    function formatDateTime(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
+    }
+
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="6" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
+            trackerTableBody.innerHTML = `<tr><td colspan="7" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
             updateChannelHighlights(); return;
         }
         activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
             const tr = document.createElement('tr');
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
+
+            const lastKillStr = entry.lastKillTime ? formatDateTime(new Date(entry.lastKillTime)) : '-';
+
             tr.innerHTML = `
                 <td>${entry.map}</td>
                 <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td><span class="missed-count-badge">${entry.missedCount}</span></td>
+                <td class="timestamp-cell">${lastKillStr}</td>
                 <td class="timer-cell">--:--:--</td>
-                <td>
+                <td class="action-cell">
                     <div class="action-buttons">
                         <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
                         <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
