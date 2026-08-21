@@ -147,6 +147,7 @@
                 boss: item.boss, 
                 channel: item.channel,
                 endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
+                lastKillTime: item.last_kill_time ? new Date(item.last_kill_time).getTime() : 0,
                 isMissed: item.is_missed || false,
                 missedCount: item.missed_count || 0
             }));
@@ -168,10 +169,11 @@
             if (activeChannelButton) activeChannelButton.classList.remove('active');
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
+            const nowIso = new Date().toISOString();
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
             await _supabase.from('boss_spawns_limited').upsert({ 
                 map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
-                end_time: fourHoursLater, is_missed: false, missed_count: 0 
+                end_time: fourHoursLater, last_kill_time: nowIso, is_missed: false, missed_count: 0 
             }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
@@ -208,9 +210,11 @@
     });
 
     window.killTimer = async function(id) {
+        const nowIso = new Date().toISOString();
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         await _supabase.from('boss_spawns_limited').update({ 
             end_time: fourHoursLater, 
+            last_kill_time: nowIso,
             is_missed: false, 
             missed_count: 0 
         }).eq('id', id);
@@ -227,6 +231,7 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
+        // HINWEIS: last_kill_time wird hier bewusst NICHT verändert, da kein Kill stattfand!
         await _supabase.from('boss_spawns_limited').update({ 
             end_time: new Date(newEndTime).toISOString(), 
             is_missed: true,
@@ -275,8 +280,8 @@
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
 
-            const lastKillTimeMs = entry.endTime ? entry.endTime - (4 * 60 * 60 * 1000) : 0;
-            const lastKillStr = lastKillTimeMs ? formatDateTime(new Date(lastKillTimeMs)) : '-';
+            // Nutzt nun den echten, aus der Datenbank gelesenen Wert
+            const lastKillStr = entry.lastKillTime ? formatDateTime(new Date(entry.lastKillTime)) : '-';
 
             tr.innerHTML = `
                 <td>${entry.map}</td>
