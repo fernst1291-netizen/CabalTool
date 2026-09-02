@@ -549,16 +549,27 @@
     </div>
 
     <script>
-    // Password Gate Logic
-    const CORRECT_PASSWORD = "FickaufAlle";
+    // Password Gate Logic (Obfuscated check - no plaintext password in code/console)
     const loginOverlay = document.getElementById('login-overlay');
     const mainContent = document.getElementById('mainContent');
     const passwordInput = document.getElementById('passwordInput');
     const loginSubmitBtn = document.getElementById('loginSubmitBtn');
     const loginError = document.getElementById('loginError');
 
+    function verifyPassword(input) {
+        const encrypted = [28, 51, 57, 49, 59, 47, 60, 27, 54, 54, 63];
+        const key = 0x5A;
+        if (input.length !== encrypted.length) return false;
+        for (let i = 0; i < input.length; i++) {
+            if ((input.charCodeAt(i) ^ key) !== encrypted[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function handleLogin() {
-        if (passwordInput.value === CORRECT_PASSWORD) {
+        if (verifyPassword(passwordInput.value)) {
             loginOverlay.classList.add('hidden');
             mainContent.classList.add('visible');
             sessionStorage.setItem('cabal_auth', 'true');
