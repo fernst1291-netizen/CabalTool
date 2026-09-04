@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -535,7 +534,7 @@
                             <th>Boss</th>
                             <th>Channel</th>
                             <th>Missed Count</th>
-                            <th>Letzter Kill</th>
+                            <th>Letzter Force</th>
                             <th>Spawntimer</th>
                             <th>Aktion</th>
                         </tr>
@@ -633,7 +632,7 @@
                 boss: item.boss, 
                 channel: item.channel,
                 endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
-                lastKillTime: item.last_kill_time ? new Date(item.last_kill_time).getTime() : 0,
+                lastForceTime: item.last_force_time ? new Date(item.last_force_time).getTime() : 0,
                 isMissed: item.is_missed || false,
                 missedCount: item.missed_count || 0
             }));
@@ -655,11 +654,10 @@
             if (activeChannelButton) activeChannelButton.classList.remove('active');
             chBtn.classList.add('active');
             activeChannelButton = chBtn;
-            const nowIso = new Date().toISOString();
             const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
             await _supabase.from('boss_spawns_2').upsert({ 
                 map: currentSelectedMap, boss: currentSelectedBoss, channel: channelName, 
-                end_time: fourHoursLater, last_kill_time: nowIso, is_missed: false, missed_count: 0 
+                end_time: fourHoursLater, last_force_time: null, is_missed: false, missed_count: 0 
             }, { onConflict: 'map,boss,channel' });
         });
         channelContainer.appendChild(chBtn);
@@ -696,11 +694,10 @@
     });
 
     window.killTimer = async function(id) {
-        const nowIso = new Date().toISOString();
         const fourHoursLater = new Date(Date.now() + (4 * 60 * 60 * 1000)).toISOString();
         await _supabase.from('boss_spawns_2').update({ 
             end_time: fourHoursLater, 
-            last_kill_time: nowIso,
+            last_force_time: null,
             is_missed: false, 
             missed_count: 0 
         }).eq('id', id);
@@ -717,8 +714,10 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
+        const nowIso = new Date().toISOString();
         await _supabase.from('boss_spawns_2').update({ 
             end_time: new Date(newEndTime).toISOString(), 
+            last_force_time: nowIso,
             is_missed: true,
             missed_count: (entry.missedCount || 0) + 1
         }).eq('id', id);
@@ -765,14 +764,14 @@
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
 
-            const lastKillStr = entry.lastKillTime ? formatDateTime(new Date(entry.lastKillTime)) : '-';
+            const lastForceStr = entry.lastForceTime ? formatDateTime(new Date(entry.lastForceTime)) : '-';
 
             tr.innerHTML = `
                 <td>${entry.map}</td>
                 <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td><span class="missed-count-badge">${entry.missedCount}</span></td>
-                <td class="timestamp-cell">${lastKillStr}</td>
+                <td class="timestamp-cell">${lastForceStr}</td>
                 <td class="timer-cell">--:--:--</td>
                 <td class="action-cell">
                     <div class="action-buttons">
