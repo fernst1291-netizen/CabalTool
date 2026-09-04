@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabal Field Boss Tracker 1.1</title>
+    <title>Cabal Field Boss Tracker 1.3</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -42,7 +42,6 @@
             min-height: 100vh;
         }
 
-        /* Password Landing Page Overlay */
         #login-overlay {
             position: fixed;
             top: 0;
@@ -97,7 +96,7 @@
             margin: 0 0 10px 0;
         }
 
-        .login-input {
+        .login-input, .settings-input {
             width: 100%;
             padding: 14px 18px;
             border-radius: 10px;
@@ -110,12 +109,12 @@
             transition: var(--transition-smooth);
         }
 
-        .login-input:focus {
+        .login-input:focus, .settings-input:focus {
             border-color: var(--accent-map);
             box-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
         }
 
-        .login-btn {
+        .login-btn, .config-btn {
             width: 100%;
             background: linear-gradient(135deg, #0284c7, #0ea5e9);
             color: #ffffff;
@@ -129,7 +128,7 @@
             box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
         }
 
-        .login-btn:hover {
+        .login-btn:hover, .config-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 25px rgba(14, 165, 233, 0.5);
         }
@@ -142,7 +141,6 @@
             font-weight: 500;
         }
 
-        /* Main Content Hide/Show */
         .main-content {
             opacity: 0;
             transition: opacity 0.5s ease;
@@ -165,13 +163,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        h3 {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: var(--text-primary);
-            font-size: 1.1rem;
-        }
-
         .container {
             max-width: 1300px;
             margin: 0 auto;
@@ -187,7 +178,6 @@
             justify-content: center;
         }
 
-        /* Basis-Buttons */
         button {
             border: 1px solid var(--panel-border);
             padding: 10px 20px;
@@ -204,7 +194,6 @@
             justify-content: center;
         }
 
-        /* Map Buttons */
         .map-btn {
             background: rgba(15, 23, 42, 0.6);
             color: var(--text-secondary);
@@ -225,7 +214,6 @@
             font-weight: 600;
         }
 
-        /* Wrapper Animation */
         .wrapper {
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
@@ -249,7 +237,6 @@
             margin-top: 4px;
         }
 
-        /* Boss Buttons */
         .boss-btn {
             background: rgba(30, 27, 75, 0.4);
             color: #d8b4fe;
@@ -270,7 +257,6 @@
             font-weight: 600;
         }
 
-        /* Channel Buttons */
         .channel-btn {
             background: rgba(6, 78, 59, 0.3);
             color: #a7f3d0;
@@ -309,7 +295,36 @@
             box-shadow: 0 0 8px var(--accent-map);
         }
 
-        /* Table Section */
+        .toolbar-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 16px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--panel-border);
+            background: rgba(15, 23, 42, 0.8);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 13.5px;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        .search-input:focus {
+            border-color: var(--accent-map);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+        }
+
         .table-section {
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
@@ -330,6 +345,9 @@
         .table-header-row h3 {
             margin: 0;
             text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
         }
         
         table {
@@ -359,18 +377,10 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             transition: background 0.2s ease;
         }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:hover td {
-            background-color: rgba(255, 255, 255, 0.025);
-        }
-        tr.missed-row td {
-            background-color: rgba(244, 63, 94, 0.04);
-        }
-        tr.missed-row:hover td {
-            background-color: rgba(244, 63, 94, 0.08);
-        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: rgba(255, 255, 255, 0.025); }
+        tr.missed-row td { background-color: rgba(244, 63, 94, 0.04); }
+        tr.missed-row:hover td { background-color: rgba(244, 63, 94, 0.08); }
         
         .missed-badge {
             background-color: rgba(244, 63, 94, 0.15);
@@ -413,9 +423,7 @@
             text-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
         }
         
-        .action-cell {
-            white-space: nowrap;
-        }
+        .action-cell { white-space: nowrap; }
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -483,44 +491,37 @@
             white-space: normal;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(6, 8, 12, 0.5);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(6, 8, 12, 0.5); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body>
 
-    <!-- Password Landing Page Overlay -->
     <div id="login-overlay">
         <div class="login-box">
-            <h1 class="login-title">Cabal Boss Tracker 1.1</h1>
+            <h1 class="login-title">Cabal Boss Tracker 1.2</h1>
             <input type="password" id="passwordInput" class="login-input" placeholder="Passwort eingeben..." autofocus>
             <button id="loginSubmitBtn" class="login-btn">Einloggen</button>
             <div id="loginError" class="login-error"></div>
         </div>
     </div>
 
-    <!-- Main Application Content -->
     <div class="main-content" id="mainContent">
         <div class="container">
-            <h2>Cabal Field Boss Tracker 1.1</h2>
+            <h2>Cabal Field Boss Tracker 1.3</h2>
+            
             <div id="mapContainer" class="button-row"></div>
             <div id="bossWrapper" class="wrapper">
                 <div id="bossContainer" class="button-row"></div>
                 <div id="channelWrapper" class="wrapper">
                     <div id="channelContainer" class="button-row"></div>
                 </div>
+            </div>
+
+            <div class="toolbar-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Filterfor Map, Boss oder Channel...">
             </div>
 
             <div class="table-section">
@@ -534,9 +535,9 @@
                             <th>Boss</th>
                             <th>Channel</th>
                             <th>Missed Count</th>
-                            <th>Letzter Force</th>
+                            <th>Last Force</th>
                             <th>Spawntimer</th>
-                            <th>Aktion</th>
+                            <th>ACTION</th>
                         </tr>
                     </thead>
                     <tbody id="trackerTableBody">
@@ -548,7 +549,6 @@
     </div>
 
     <script>
-    // Password Gate Logic (Obfuscated check - no plaintext password in code/console)
     const loginOverlay = document.getElementById('login-overlay');
     const mainContent = document.getElementById('mainContent');
     const passwordInput = document.getElementById('passwordInput');
@@ -560,9 +560,7 @@
         const key = 0x5A;
         if (input.length !== encrypted.length) return false;
         for (let i = 0; i < input.length; i++) {
-            if ((input.charCodeAt(i) ^ key) !== encrypted[i]) {
-                return false;
-            }
+            if ((input.charCodeAt(i) ^ key) !== encrypted[i]) return false;
         }
         return true;
     }
@@ -579,30 +577,64 @@
         }
     }
 
-    // Check if already authenticated in this session
     if (sessionStorage.getItem('cabal_auth') === 'true') {
         loginOverlay.classList.add('hidden');
         mainContent.classList.add('visible');
     }
 
     loginSubmitBtn.addEventListener('click', handleLogin);
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleLogin();
-        }
-    });
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
 
     const SUPABASE_URL = 'https://hrduuxzogmhasjtjcfdx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZHV1eHpvZ21oYXNqdGpjZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTA3MzQsImV4cCI6MjEwMjQ2NjczNH0.nFMhl4WBlZhIW4HJbK5FH5swY9YrSdMBL5bYzii2NQ0';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Buttons haben die englischen Bezeichnungen
     const cabalData = {
-        "Forgotten Ruin": [{ name: "Distichous Mongrel" }, { name: "Ancient Cockatrice" }, { name: "Monakus Karion" }, { name: "Virulent Cauda" }],
-        "Lakeside": [{ name: "Berderk Faello" }],
-        "Pontus Ferrum": [{ name: "TA-01 Gravis Rota (oben)" }, { name: "TA-01 Gravis Rota (unten)" }, { name: "MA-06 Quadra" }, { name: "FP-01 Magnus Penna (oben)" }, { name: "FP-01 Magnus Penna (unten)" }, { name: "UMD-03 Lautus Pluma" }],
-        "Porta Inferno": [{ name: "Manticore" }, { name: "Dark Kimzark" }, { name: "Keshapone Minisha" }],
-        "Senillinea": [{ name: "Enthiud (Enthuid)" }, { name: "Giant Wolf Leader" }, { name: "Meer King" }, { name: "Lesser Panda King" }]
+        "Forgotten Ruin": [
+            { name: "Distichous Mongrel" }, 
+            { name: "Ancient Cockatrice" }, 
+            { name: "Monakus Karion" }, 
+            { name: "Virulent Cauda" }
+        ],
+        "Lakeside": [
+            { name: "Berderk Faello" }
+        ],
+        "Pontus Ferrum": [
+            { name: "TA-01 Gravis Rota (Top)" }, 
+            { name: "TA-01 Gravis Rota (Bottom)" }, 
+            { name: "MA-06 Quadra" }, 
+            { name: "FP-01 Magnus Penna (Top)" }, 
+            { name: "FP-01 Magnus Penna (Bottom)" }, 
+            { name: "UMD-03 Lautus Pluma" }
+        ],
+        "Porta Inferno": [
+            { name: "Manticore" }, 
+            { name: "Dark Kimzark" }, 
+            { name: "Keshapone Minisha" }
+        ],
+        "Senillinea": [
+            { name: "Enthiud (Enthuid)" }, 
+            { name: "Giant Wolf Leader" }, 
+            { name: "Meer King" }, 
+            { name: "Lesser Panda King" }
+        ]
     };
+
+    // Hilfsfunktion, um englische Button-Namen sowohl mit den alten als auch mit den neuen DB-Einträgen abzugleichen
+    function getBossAliases(btnName) {
+        let aliases = [btnName];
+        if (btnName === "TA-01 Gravis Rota (Top)") {
+            aliases.push("TA-01 Gravis Rota (oben)", "Gravis Rota(oben)", "TA-01 Gravis Rota(oben)");
+        } else if (btnName === "TA-01 Gravis Rota (Bottom)") {
+            aliases.push("TA-01 Gravis Rota (unten)", "Gravis Rota(unten)", "TA-01 Gravis Rota(unten)");
+        } else if (btnName === "FP-01 Magnus Penna (Top)") {
+            aliases.push("FP-01 Magnus Penna (oben)", "Penna(oben)", "FP-01 Magnus Penna(oben)");
+        } else if (btnName === "FP-01 Magnus Penna (Bottom)") {
+            aliases.push("FP-01 Magnus Penna (unten)", "Penna(unten)", "FP-01 Magnus Penna(unten)");
+        }
+        return aliases;
+    }
 
     const mapContainer = document.getElementById('mapContainer');
     const bossWrapper = document.getElementById('bossWrapper');
@@ -610,21 +642,20 @@
     const channelWrapper = document.getElementById('channelWrapper');
     const channelContainer = document.getElementById('channelContainer');
     const trackerTableBody = document.getElementById('trackerTableBody');
+    const searchInput = document.getElementById('searchInput');
 
     let activeMapButton = null, activeBossButton = null, activeChannelButton = null;
     let currentSelectedMap = null, currentSelectedBoss = null;
+    let currentSelectedBossAliases = [];
     let activeEntries = [];
     const channelButtonMap = {};
 
     async function fetchSpawns() {
-        console.log("Lade Daten von Supabase...");
         const { data, error } = await _supabase.from('boss_spawns_2').select('*').range(0, 999);
-        
         if (error) {
             console.error("Supabase Fehler:", error);
             return;
         }
-
         if (data) {
             activeEntries = data.map(item => ({
                 id: item.id, 
@@ -671,7 +702,7 @@
             if (activeMapButton === mapBtn) {
                 bossWrapper.classList.remove('visible'); channelWrapper.classList.remove('visible'); mapBtn.classList.remove('active');
                 activeMapButton = null; activeBossButton = null; activeChannelButton = null;
-                currentSelectedMap = null; currentSelectedBoss = null; updateChannelHighlights(); return;
+                currentSelectedMap = null; currentSelectedBoss = null; currentSelectedBossAliases = []; updateChannelHighlights(); return;
             }
             if (activeMapButton) activeMapButton.classList.remove('active');
             mapBtn.classList.add('active'); activeMapButton = mapBtn; currentSelectedMap = mapName;
@@ -683,8 +714,12 @@
                 bossBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (activeBossButton) activeBossButton.classList.remove('active');
-                    bossBtn.classList.add('active'); activeBossButton = bossBtn; currentSelectedBoss = boss.name;
-                    channelWrapper.classList.add('visible'); updateChannelHighlights();
+                    bossBtn.classList.add('active'); 
+                    activeBossButton = bossBtn; 
+                    currentSelectedBoss = boss.name;
+                    currentSelectedBossAliases = getBossAliases(boss.name);
+                    channelWrapper.classList.add('visible'); 
+                    updateChannelHighlights();
                 });
                 bossContainer.appendChild(bossBtn);
             });
@@ -730,7 +765,7 @@
     function updateChannelHighlights() {
         Object.values(channelButtonMap).forEach(btn => btn.classList.remove('has-spawn'));
         if (!currentSelectedMap || !currentSelectedBoss) return;
-        activeEntries.filter(e => e.map === currentSelectedMap && e.boss === currentSelectedBoss)
+        activeEntries.filter(e => e.map === currentSelectedMap && currentSelectedBossAliases.includes(e.boss))
                      .forEach(e => { if (channelButtonMap[e.channel]) channelButtonMap[e.channel].classList.add('has-spawn'); });
     }
 
@@ -755,11 +790,21 @@
 
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
-        if (activeEntries.length === 0) {
-            trackerTableBody.innerHTML = `<tr><td colspan="7" class="empty-table">Keine aktiven Einträge. Wähle Map -> Boss -> Channel aus.</td></tr>`;
+        const filterVal = searchInput.value.toLowerCase();
+        
+        const filteredEntries = activeEntries.filter(entry => {
+            if (!filterVal) return true;
+            return entry.map.toLowerCase().includes(filterVal) ||
+                   entry.boss.toLowerCase().includes(filterVal) ||
+                   entry.channel.toLowerCase().includes(filterVal);
+        });
+
+        if (filteredEntries.length === 0) {
+            trackerTableBody.innerHTML = `<tr><td colspan="7" class="empty-table">Keine passenden Einträge gefunden.</td></tr>`;
             updateChannelHighlights(); return;
         }
-        activeEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
+
+        filteredEntries.sort((a, b) => a.endTime - b.endTime).forEach(entry => {
             const tr = document.createElement('tr');
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
@@ -777,7 +822,7 @@
                     <div class="action-buttons">
                         <button class="kill-btn" onclick="killTimer('${entry.id}')">Kill</button>
                         <button class="force-btn" onclick="forceResetTimer('${entry.id}')">Force</button>
-                        <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Löschen</button>
+                        <button class="delete-btn" onclick="deleteSpawn('${entry.id}')">🗑️ Delete</button>
                     </div>
                 </td>`;
             trackerTableBody.appendChild(tr);
@@ -793,7 +838,6 @@
             if (!tr) return;
             
             const timeLeftMs = entry.endTime - Date.now();
-            
             tr.classList.toggle('missed-row', entry.isMissed);
             
             const cell = tr.querySelector('.timer-cell');
@@ -808,6 +852,8 @@
         
         updateChannelHighlights();
     }
+
+    searchInput.addEventListener('input', rebuildTable);
 
     fetchSpawns();
     setInterval(updateTableValues, 1000);
