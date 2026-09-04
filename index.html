@@ -7,19 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #06080c;
-            --panel-bg: rgba(13, 17, 23, 0.75);
-            --panel-border: rgba(255, 255, 255, 0.07);
-            --panel-border-glow: rgba(56, 189, 248, 0.25);
+            --bg-color: #030406;
+            --panel-bg: rgba(10, 12, 16, 0.85);
+            --panel-border: rgba(255, 255, 255, 0.05);
+            --panel-border-glow: rgba(185, 28, 28, 0.3);
             
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             
-            --accent-map: #0ea5e9;
+            --accent-map: #b91c1c;
             --accent-boss: #a855f7;
             --accent-channel: #10b981;
             --accent-kill: #eab308;
-            --accent-force: #3b82f6;
+            --accent-force: #991b1b;
             --accent-danger: #f43f5e;
             
             --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -33,9 +33,9 @@
             font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #0b0f17 0%, var(--bg-color) 100%);
+                radial-gradient(circle at 15% 15%, rgba(185, 28, 28, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #020305 0%, var(--bg-color) 100%);
             color: var(--text-primary);
             margin: 0;
             padding: 40px 20px;
@@ -50,9 +50,9 @@
             height: 100%;
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #0b0f17 0%, var(--bg-color) 100%);
+                radial-gradient(circle at 15% 15%, rgba(185, 28, 28, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #020305 0%, var(--bg-color) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -74,7 +74,7 @@
             padding: 40px;
             border-radius: 20px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -92,7 +92,7 @@
             background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+            text-shadow: 0 0 25px rgba(185, 28, 28, 0.25);
             margin: 0 0 10px 0;
         }
 
@@ -101,7 +101,7 @@
             padding: 14px 18px;
             border-radius: 10px;
             border: 1px solid var(--panel-border);
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(5, 7, 10, 0.9);
             color: var(--text-primary);
             font-family: 'Outfit', sans-serif;
             font-size: 15px;
@@ -111,26 +111,26 @@
 
         .login-input:focus, .settings-input:focus {
             border-color: var(--accent-map);
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
+            box-shadow: 0 0 15px rgba(185, 28, 28, 0.3);
         }
 
         .login-btn, .config-btn {
             width: 100%;
-            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            background: linear-gradient(135deg, #991b1b, #b91c1c);
             color: #ffffff;
-            border: 1px solid #38bdf8;
+            border: 1px solid #dc2626;
             padding: 14px;
             border-radius: 10px;
             font-weight: 600;
             font-size: 15px;
             cursor: pointer;
             transition: var(--transition-smooth);
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 0 20px rgba(185, 28, 28, 0.3);
         }
 
         .login-btn:hover, .config-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 25px rgba(14, 165, 233, 0.5);
+            box-shadow: 0 4px 25px rgba(185, 28, 28, 0.5);
         }
 
         .login-error {
@@ -157,7 +157,7 @@
             text-transform: uppercase;
             font-size: 1.75rem;
             margin-bottom: 30px;
-            text-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+            text-shadow: 0 0 25px rgba(185, 28, 28, 0.25);
             background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -195,22 +195,22 @@
         }
 
         .map-btn {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(10, 12, 16, 0.6);
             color: var(--text-secondary);
-            border-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.04);
         }
         .map-btn:hover {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: rgba(14, 165, 233, 0.4);
-            color: var(--accent-map);
+            background: rgba(185, 28, 28, 0.12);
+            border-color: rgba(185, 28, 28, 0.4);
+            color: #fca5a5;
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+            box-shadow: 0 4px 20px rgba(185, 28, 28, 0.2);
         }
         .map-btn.active {
-            background: linear-gradient(135deg, #0284c7, #0ea5e9);
+            background: linear-gradient(135deg, #991b1b, #b91c1c);
             color: #ffffff;
-            border-color: #38bdf8;
-            box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+            border-color: #dc2626;
+            box-shadow: 0 0 20px rgba(185, 28, 28, 0.5);
             font-weight: 600;
         }
 
@@ -220,7 +220,7 @@
             padding: 0;
             border-radius: 16px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             max-height: 0;
             opacity: 0;
             overflow: hidden;
@@ -281,7 +281,7 @@
         }
         .channel-btn.has-spawn {
             border-color: var(--accent-map);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 12px rgba(185, 28, 28, 0.4);
         }
         .channel-btn.has-spawn::after {
             content: '';
@@ -313,7 +313,7 @@
             padding: 10px 16px;
             border-radius: 10px;
             border: 1px solid var(--panel-border);
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(5, 7, 10, 0.9);
             color: var(--text-primary);
             font-family: 'Outfit', sans-serif;
             font-size: 13.5px;
@@ -322,7 +322,7 @@
         }
         .search-input:focus {
             border-color: var(--accent-map);
-            box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+            box-shadow: 0 0 12px rgba(185, 28, 28, 0.3);
         }
 
         .table-section {
@@ -331,7 +331,7 @@
             padding: 24px;
             border-radius: 16px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             overflow-x: auto;
         }
         .table-header-row {
@@ -374,11 +374,11 @@
         th:last-child { border-top-right-radius: 8px; }
 
         tr td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.025);
             transition: background 0.2s ease;
         }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background-color: rgba(255, 255, 255, 0.025); }
+        tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
         tr.missed-row td { background-color: rgba(244, 63, 94, 0.04); }
         tr.missed-row:hover td { background-color: rgba(244, 63, 94, 0.08); }
         
@@ -397,7 +397,7 @@
         }
         .missed-count-badge {
             font-family: 'JetBrains Mono', monospace;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             padding: 4px 10px;
             border-radius: 6px;
             border: 1px solid var(--panel-border);
@@ -411,12 +411,17 @@
             font-size: 12.5px;
             color: var(--text-secondary);
         }
+        .timestamp-cell.negative {
+            color: var(--accent-danger);
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+        }
+
         .timer-cell {
             font-family: 'JetBrains Mono', monospace;
             font-size: 14.5px;
             font-weight: 600;
-            color: #38bdf8;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            color: #fca5a5;
+            text-shadow: 0 0 10px rgba(185, 28, 28, 0.3);
         }
         .timer-cell.negative {
             color: var(--accent-danger);
@@ -453,14 +458,14 @@
         .force-btn {
             padding: 7px 12px;
             font-size: 12px;
-            background-color: rgba(59, 130, 246, 0.15);
-            color: #93c5fd;
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background-color: rgba(185, 28, 28, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(185, 28, 28, 0.35);
         }
         .force-btn:hover:not(:disabled) {
             background-color: var(--accent-force);
             color: #ffffff;
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 12px rgba(185, 28, 28, 0.5);
         }
         .force-btn:disabled {
             background-color: rgba(255, 255, 255, 0.02);
@@ -492,16 +497,16 @@
         }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(6, 8, 12, 0.5); }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-track { background: rgba(3, 4, 6, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
         <div class="login-box">
-            <h1 class="login-title">Cabal Boss Tracker 1.2</h1>
+            <h1 class="login-title">Cabal Boss Tracker 1.3</h1>
             <input type="password" id="passwordInput" class="login-input" placeholder="Passwort eingeben..." autofocus>
             <button id="loginSubmitBtn" class="login-btn">Einloggen</button>
             <div id="loginError" class="login-error"></div>
@@ -521,7 +526,7 @@
             </div>
 
             <div class="toolbar-section">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Filterfor Map, Boss oder Channel...">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Filter for Map, Boss oder Channel...">
             </div>
 
             <div class="table-section">
@@ -589,7 +594,6 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZHV1eHpvZ21oYXNqdGpjZmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTA3MzQsImV4cCI6MjEwMjQ2NjczNH0.nFMhl4WBlZhIW4HJbK5FH5swY9YrSdMBL5bYzii2NQ0';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Buttons haben die englischen Bezeichnungen
     const cabalData = {
         "Forgotten Ruin": [
             { name: "Distichous Mongrel" }, 
@@ -621,7 +625,6 @@
         ]
     };
 
-    // Hilfsfunktion, um englische Button-Namen sowohl mit den alten als auch mit den neuen DB-Einträgen abzugleichen
     function getBossAliases(btnName) {
         let aliases = [btnName];
         if (btnName === "TA-01 Gravis Rota (Top)") {
@@ -663,7 +666,7 @@
                 boss: item.boss, 
                 channel: item.channel,
                 endTime: item.end_time ? new Date(item.end_time).getTime() : 0, 
-                lastForceTime: item.last_force_time ? new Date(item.last_force_time).getTime() : 0,
+                lastForceTime: item.last_force_time || '',
                 isMissed: item.is_missed || false,
                 missedCount: item.missed_count || 0
             }));
@@ -749,10 +752,12 @@
             newEndTime += 4 * 60 * 60 * 1000;
         }
 
-        const nowIso = new Date().toISOString();
+        const timeLeftMs = entry.endTime - now;
+        const forceTimerStr = formatTimeLeft(timeLeftMs);
+
         await _supabase.from('boss_spawns_2').update({ 
             end_time: new Date(newEndTime).toISOString(), 
-            last_force_time: nowIso,
+            last_force_time: forceTimerStr,
             is_missed: true,
             missed_count: (entry.missedCount || 0) + 1
         }).eq('id', id);
@@ -778,16 +783,6 @@
         return isNegative ? `-${timeStr}` : timeStr;
     }
 
-    function formatDateTime(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
-    }
-
     function rebuildTable() {
         trackerTableBody.innerHTML = '';
         const filterVal = searchInput.value.toLowerCase();
@@ -809,14 +804,15 @@
             tr.id = `row-${entry.id}`;
             if (entry.isMissed) tr.classList.add('missed-row');
 
-            const lastForceStr = entry.lastForceTime ? formatDateTime(new Date(entry.lastForceTime)) : '-';
+            const lastForceStr = entry.lastForceTime || '-';
+            const isNegativeForce = entry.lastForceTime && entry.lastForceTime.startsWith('-');
 
             tr.innerHTML = `
                 <td>${entry.map}</td>
                 <td><span class="boss-name-span">${entry.boss}</span>${entry.isMissed ? '<span class="missed-badge">⚠️ Verpasst</span>' : ''}</td>
                 <td>${entry.channel}</td>
                 <td><span class="missed-count-badge">${entry.missedCount}</span></td>
-                <td class="timestamp-cell">${lastForceStr}</td>
+                <td class="timestamp-cell ${isNegativeForce ? 'negative' : ''}">${lastForceStr}</td>
                 <td class="timer-cell">--:--:--</td>
                 <td class="action-cell">
                     <div class="action-buttons">
